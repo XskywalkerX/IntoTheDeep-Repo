@@ -11,6 +11,8 @@ public class MProfile implements Runnable {
 
     volatile public ElapsedTime time = new ElapsedTime();
 
+    double kP, kI, kD, kV, kA, kStatic;
+
     volatile public double velocity = 0;
     volatile public double distance = 0;
     volatile public double acceleration = 0;
@@ -65,13 +67,14 @@ public class MProfile implements Runnable {
         time.reset();
 
         while (!Thread.currentThread().isInterrupted()) {
+
             this.cp = motor.getCurrentPosition();
             this.tp = motor.getTargetPosition();
             System.out.println("CP IS " + this.cp + " | TP IS " + this.tp);
             System.out.println(velocity);
 
             if (cp < Math.abs(tp)) {
-                velocity = rectFunction();
+                velocity = rectFunction(1.0 / 3.0, 0.422);
             } else {
                 velocity = 0;
             }
@@ -85,10 +88,11 @@ public class MProfile implements Runnable {
     }
 
 
-    public double rectFunction() {
+    public double rectFunction(double accelPeriod, double decelPeriod) {
 
-        double dAccel = 0.5 * MAX_VEL * MAX_VEL / MAX_ACCEL;
+        double dAccel = accelPeriod * tp;
         double dCruise = tp - (dAccel + dAccel);
+        double ddDecel = decelPeriod * tp;
 
         double dRemaining = tp - cp;
 
@@ -96,8 +100,9 @@ public class MProfile implements Runnable {
             System.out.println("ACCEL");
             acceleration = MAX_ACCEL;
             velocity = cp > 0 ? Math.sqrt(2 * MAX_ACCEL * cp) : Math.sqrt(2 * MAX_ACCEL * 0.1);
+            //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
             distance = 0.5 * acceleration * cp * cp;
-        } else if (dRemaining > dAccel) {
+        } else if (dRemaining > ddDecel) {
             System.out.println("CRUISE");
             acceleration = 0;
             velocity = MAX_VEL;

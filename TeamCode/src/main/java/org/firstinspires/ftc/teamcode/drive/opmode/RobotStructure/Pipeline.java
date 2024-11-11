@@ -63,23 +63,23 @@ public class Pipeline extends OpenCvPipeline {
     public static double width3 = 0;
 
     //BLUE FILTER
-    public static double lowerBlue = 5;
-    public static double lowerGreen = 230;
-    public static double lowerRed = 130;
+    public static double lowerBlue = 2;
+    public static double lowerGreen = 150;
+    public static double lowerRed = 65;
 
     public static double upperBlue = 15;
-    public static double upperGreen = 255;
-    public static double upperRed = 170;
+    public static double upperGreen = 250;
+    public static double upperRed = 140;
 
 
     //RED FILTER
-    public static double lowerBlue2 = 120;
-    public static double lowerGreen2 = 90;
-    public static double lowerRed2 = 135;
+    public static double lowerBlue2 = 121;
+    public static double lowerGreen2 = 180;
+    public static double lowerRed2 = 15;
 
     public static double upperBlue2 = 130;
-    public static double upperGreen2 = 235;
-    public static double upperRed2 = 195;
+    public static double upperGreen2 = 250;
+    public static double upperRed2 = 230;
 
 
     //YELLOW FILTER
@@ -93,7 +93,7 @@ public class Pipeline extends OpenCvPipeline {
 
 
     // Calculate the distance using the formula
-    public static final double objectWidthInRealWorldUnits = 3.75; // Replace with the actual width of the object in real-world units
+    public static final double objectWidthInRealWorldUnits = 9; // Replace with the actual width of the object in real-world units
     public static final double focalLength = 377.95; // Replace with the focal length of the camera in pixels
 
 
@@ -338,8 +338,28 @@ public class Pipeline extends OpenCvPipeline {
         return (objectWidthInRealWorldUnits * focalLength) / width;
     }
 
+    public double blueDis() {
+        return getDistance(width);
+    }
+
+    public double redDis() {
+        return getDistance(width2);
+    }
+
+    public double yellowDis() {
+        return getDistance(width3);
+    }
+
     public boolean getIsON() {
         return isOn;
+    }
+
+    public boolean getYellowOn() {
+        return yellowOn;
+    }
+
+    public boolean getRedOn() {
+        return redOn;
     }
 
     public String getSide() {

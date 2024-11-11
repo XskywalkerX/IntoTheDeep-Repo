@@ -132,10 +132,6 @@ public class Intake {
         return itk;
     }
 
-
-
-
-
     public void telemetry(Telemetry telemetry) {
         telemetry.addData("INTAKE POWER", expansion.getPower());
         telemetry.addData("INTAKE TARGET", expansion.getTargetPosition());
