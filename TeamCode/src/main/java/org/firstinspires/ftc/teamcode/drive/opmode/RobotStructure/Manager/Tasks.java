@@ -19,7 +19,7 @@ public enum Tasks {
         return match;
     }
 
-    private Tasks(String name) {
-        this.TaskName = name;
+    private Tasks(String TaskName) {
+        this.TaskName = TaskName;
     }
 }
