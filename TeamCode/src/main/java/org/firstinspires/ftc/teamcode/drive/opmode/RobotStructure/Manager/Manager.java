@@ -78,6 +78,16 @@ public class Manager extends LinearOpMode {
 
             sleep(10);
             telemetry.addLine();
+            telemetry.addLine("============= SELECTED =============");
+            telemetry.addLine();
+
+            for (int i = 0; i < _checkedTasks.size(); i++) {
+                telemetry.addData("TASK " + (i + 1), _checkedTasks.get(i));
+            }
+
+            telemetry.addLine();
+            telemetry.addLine("====================================");
+            telemetry.addLine();
             telemetry.addLine();
 
             telemetry.addData("ALLIANCE", blueSide ? "BLUE" : "RED");
@@ -85,43 +95,45 @@ public class Manager extends LinearOpMode {
             telemetry.update();
 
             sleep(150);
-
-            for(Tasks task : _checkedTasks) {
-                Log.d("TASK: ", task.TaskName);
-                Log.d(TAG, "start: " + task.TaskName);
-
-                if(task.TaskName.equalsIgnoreCase("D_BASKET")) {
-                    Log.d(this.getClass().getName(), "running: basket");
-                    //delivery sample in the high basket
-                }
-                if(task.TaskName.equalsIgnoreCase("D_OBS_ZONE")) {
-                    Log.d(this.getClass().getName(), "running: drop");
-                    //drop sample in obs zone
-                }
-                if(task.TaskName.equalsIgnoreCase("CATCH_SAMPLE")) {
-                    Log.d(this.getClass().getName(), "running: catch");
-                    //catch sample from submersible
-                }
-                if(task.TaskName.equalsIgnoreCase("CLIP_SPECIMEN")) {
-                    Log.d(this.getClass().getName(), "running: clip");
-                    //clip specimen in the high chamber
-                }
-                if(task.TaskName.equalsIgnoreCase("PARK")) {
-                    Log.d(this.getClass().getName(), "running: park");
-                    //park on net zone
-                }
-
-                telemetry.update();
-            }
-            for(int i = 0; i < _checkedTasks.size() - 1; i++) {
-                Log.d(TAG, "runOpMode: Removed: " + _checkedTasks.get(i).TaskName);
-                _checkedTasks.remove(i);
-            }
         }
 
         waitForStart();
-        while (opModeIsActive()) {
 
+        for(Tasks task : _checkedTasks) {
+            Log.d("TASK: ", task.TaskName);
+            Log.d(TAG, "start: " + task.TaskName);
+
+            if(task.TaskName.equalsIgnoreCase("D_BASKET")) {
+                Log.d(this.getClass().getName(), "running: basket");
+                telemetry.addLine("running: basket");
+                //delivery sample in the high basket
+            }
+            if(task.TaskName.equalsIgnoreCase("D_OBS_ZONE")) {
+                Log.d(this.getClass().getName(), "running: drop");
+                telemetry.addLine("running: drop");
+                //drop sample in obs zone
+            }
+            if(task.TaskName.equalsIgnoreCase("CATCH_SAMPLE")) {
+                Log.d(this.getClass().getName(), "running: catch");
+                telemetry.addLine("running: catch");
+                //catch sample from submersible
+            }
+            if(task.TaskName.equalsIgnoreCase("CLIP_SPECIMEN")) {
+                Log.d(this.getClass().getName(), "running: clip");
+                telemetry.addLine("running: clip");
+                //clip specimen in the high chamber
+            }
+            if(task.TaskName.equalsIgnoreCase("PARK")) {
+                Log.d(this.getClass().getName(), "running: park");
+                telemetry.addLine("running: park");
+                //park on net zone
+            }
+
+            telemetry.update();
+        }
+        for(int i = 0; i < _checkedTasks.size() - 1; i++) {
+            Log.d(TAG, "runOpMode: Removed: " + _checkedTasks.get(i).TaskName);
+            _checkedTasks.remove(i);
         }
     }
 }
