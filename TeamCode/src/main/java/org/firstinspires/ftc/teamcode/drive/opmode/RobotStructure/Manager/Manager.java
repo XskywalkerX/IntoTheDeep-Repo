@@ -22,6 +22,7 @@ public class Manager extends LinearOpMode {
     private boolean blueSide = false; // if it is blue side autonomous DEFAULT IS RED SIDE
     private boolean nearBasket = false; // if it is near the basket on the start DEFAULT IS AWAY
 
+
     private void loadTasks() {
         _tasks = new String[Tasks.values().length][2];
 
