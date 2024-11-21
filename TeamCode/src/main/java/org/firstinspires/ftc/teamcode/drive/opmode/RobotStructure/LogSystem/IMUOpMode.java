@@ -1,15 +1,19 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.LogSystem;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 @TeleOp(name = "IMU WebSocket OpMode", group = "Sensor")
 public class IMUOpMode extends LinearOpMode {
+
+    SampleMecanumDrive drive;
 
     private BNO055IMU imu;
     Dash dash;
@@ -20,6 +24,8 @@ public class IMUOpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+        drive = new SampleMecanumDrive(hardwareMap);
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -52,6 +58,12 @@ public class IMUOpMode extends LinearOpMode {
                 sendIMUData();
                 timer.reset();
             }
+
+            drive.setWeightedDrivePower(new Pose2d(
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    -gamepad1.right_stick_x
+            ));
         }
 
         // Close WebSocket connection if open
