@@ -9,10 +9,16 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery;
+import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.DriveTrain;
+
 import java.util.ArrayList;
 
 @Autonomous
 public class Manager extends LinearOpMode {
+
+    volatile public static DriveTrain drive;
+    volatile public static Delivery delivery;
 
     private String[][] _tasks;
     private ArrayList<Tasks> _checkedTasks = new ArrayList<>();
@@ -37,6 +43,8 @@ public class Manager extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
+        drive = new DriveTrain(hardwareMap);
+        delivery = new Delivery(hardwareMap);
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
@@ -123,10 +131,32 @@ public class Manager extends LinearOpMode {
                 Log.d(this.getClass().getName(), "running: clip");
                 telemetry.addLine("running: clip");
                 //clip specimen in the high chamber
+                drive.toClip();
             }
             if(task.TaskName.equalsIgnoreCase("PARK")) {
                 Log.d(this.getClass().getName(), "running: park");
                 telemetry.addLine("running: park");
+                //park on net zone
+            }
+            if(task.TaskName.equalsIgnoreCase("CATCH_SPECIMEN")) {
+                Log.d(this.getClass().getName(), "running: catch specimen");
+                telemetry.addLine("running: catch specimen");
+                //catch specimen
+                drive.catchSpecimen();
+            }
+            if(task.TaskName.equalsIgnoreCase("SPIKE_MARK_1")) {
+                Log.d(this.getClass().getName(), "running: spike mark 1");
+                telemetry.addLine("running: spike mark 1");
+                //park on net zone
+            }
+            if(task.TaskName.equalsIgnoreCase("SPIKE_MARK_2")) {
+                Log.d(this.getClass().getName(), "running: spike mark 2");
+                telemetry.addLine("running: spike mark 2");
+                //park on net zone
+            }
+            if(task.TaskName.equalsIgnoreCase("SPIKE_MARK_3")) {
+                Log.d(this.getClass().getName(), "running: spike mark 3");
+                telemetry.addLine("running: spike mark 3");
                 //park on net zone
             }
 

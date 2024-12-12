@@ -1,131 +1,188 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure;
 
-import com.acmerobotics.roadrunner.control.PIDFController;
-import com.acmerobotics.roadrunner.util.NanoClock;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.kA;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.kD;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.kI;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.kP;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.kStatic;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.kV;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.MAX_VEL;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.linear;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Delivery.mp;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.control.PIDFController;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+
+class DeliveryThread implements Runnable {
+
+    @Override
+    public void run() {
+
+        double velocity = 0;
+
+        PIDCoefficients coefficients = new PIDCoefficients(kP, kI, kD);
+        PIDFController controller = new PIDFController(coefficients, kV, kA, kStatic);
+
+        while(!Thread.currentThread().isInterrupted()) {
+            double cp = linear.getCurrentPosition();
+            double tp = linear.getTargetPosition();
+
+            if (cp < Math.abs(tp)) {
+                velocity = mp.rectFunction(1.0 / 3.0, 0.422);
+            } else {
+                velocity = 0;
+            }
+            controller.setOutputBounds(0, MAX_VEL);
+            controller.setTargetAcceleration(mp.getAccel());
+            controller.setTargetVelocity(velocity);
+            controller.setTargetPosition(tp);
+
+            linear.setVelocity(controller.update(cp, linear.getVelocity()));
+        }
+    }
+}
 
 public class Delivery {
 
-    public static double MAX_ACCEL = 0;
-    public static double MAX_VEL = 0;
+    public enum Cycle {
+        BASKET,
+        CHAMBER,
+        IDLE
+    }
 
-    DcMotorEx linear;
-    volatile public static boolean clipped = false;
-    volatile public static boolean dunked = false;
+    public enum Chamber {
+        CATCH_SPECIMEN,
+        CLIP_SPECIMEN,
+        UP_LINEAR,
+        IDLE
+    }
 
-    public static double kp = 0;
-    public static double ki = 0;
-    public static double kd = 0;
+    volatile public static Chamber chamber = Chamber.IDLE;
+    volatile public static Cycle cycle = Cycle.IDLE;
 
-    public static double kV = 0;
-    public static double kA = 0;
-    public static double kStatic = 0;
+    volatile public static double MAX_VEL = 2800;
+    volatile public static double MAX_ACCEL = 2800;
 
-    double currentPosition;
-    double currentVelocity;
+    volatile public static double kP = 0;
+    volatile public static double kI = 0;
+    volatile public static double kD = 0;
 
-    PIDFController controller;
-    PIDCoefficients coefficients;
-    MProfile profileSegment;
+    volatile public static double kV = 0;
+    volatile public static double kA = 0;
+    volatile public static double kStatic = 0;
 
-    double startTime;
-    double totalDistance;
+    volatile public static MProfile mp;
 
     HardwareMap hwMap;
 
-    public Delivery(HardwareMap hwMap) {
+    // Motors
+    volatile public static DcMotorEx linear;
 
+
+    // Sensors
+
+    DistanceSensor boxSensor;
+
+    // Servos
+    Servo deliveryLeft;
+    Servo deliveryRight;
+    Servo claw;
+
+    public Delivery(HardwareMap hwMap) {
         this.hwMap = hwMap;
 
         linear = hwMap.get(DcMotorEx.class, "linear");
-        coefficients = new PIDCoefficients(kp, ki, kd);
-        controller = new PIDFController(
-                coefficients,
-                kV,
-                kA,
-                kStatic,
-                (position, velocity) -> 0.0,
-                NanoClock.system()
-        );
+        deliveryLeft = hwMap.get(Servo.class, "deliveryLeft");
+        deliveryRight = hwMap.get(Servo.class, "deliveryRight");
+        claw = hwMap.get(Servo.class, "claw");
+        boxSensor = hwMap.get(DistanceSensor.class, "deliverySensor");
 
-        controller.setOutputBounds(-1.0, 1.0);
-
-        totalDistance = linear.getTargetPosition();
-
-        startTime = NanoClock.system().seconds();
+        mp = new MProfile(linear, MAX_VEL, MAX_ACCEL);
     }
 
-    public void update() {
+    /** AUTONOMOUS **/
 
-        double currentTime = NanoClock.system().seconds() - startTime;
+    ///////// SPECIMEN /////////
 
-        profileSegment = getMProfileSegment(currentTime);
+    // SIMPLE MOVEMENTS //
 
-        controller.setTargetVelocity(profileSegment.velocity);
-        controller.setTargetAcceleration(profileSegment.acceleration);
-
-        currentPosition = linear.getCurrentPosition();
-        currentVelocity = linear.getVelocity();
-
-        double motorPower = controller.update(currentPosition, currentVelocity);
-
-        linear.setPower(motorPower);
+    public void closeClaw() {
+        claw.setPosition(1.0);
+    }
+    public void openClaw() {
+        claw.setPosition(0.0);
+    }
+    public void moveLinear(int TARGET_POSITION) {
+        linear.setTargetPosition(TARGET_POSITION);
+    }
+    public void returnLinear() {
+        moveLinear(0);
+    }
+    public void moveBox(double finalPos) {
+        deliveryLeft.setPosition(finalPos);
+        deliveryRight.setPosition(1 - finalPos);
     }
 
-    /**
-     * Generates the current segment of the motion profile based on elapsed time.
-     * This method computes the velocity and acceleration at each time step.
-     */
-    private MProfile getMProfileSegment(double elapsedTime) {
-        // Time to reach max velocity under max acceleration
-        double tAccel = MAX_VEL / MAX_ACCEL;
+    // COMPLEX MOVEMENTS //
 
-        // Distance covered during acceleration phase
-        double dAccel = 0.5 * MAX_ACCEL * tAccel * tAccel;
+    public void deliveryBasket() {
+        double TARGET_POSITION = 1200;
+        moveLinear((int) TARGET_POSITION);
 
-        double velocity, acceleration;
+        double path = Math.abs(TARGET_POSITION - linear.getCurrentPosition());
 
-        // Check the phase of the motion profile
-        if (elapsedTime < tAccel) {
-            // Acceleration phase
-            acceleration = MAX_ACCEL;
-            velocity = acceleration * elapsedTime;
-        } else if (elapsedTime < (totalDistance / MAX_VEL)) {
-            // Constant velocity (cruising phase)
-            acceleration = 0;
-            velocity = MAX_VEL;
-        } else {
-            // Deceleration phase
-            double tDecel = elapsedTime - (totalDistance / MAX_VEL);
-            acceleration = -MAX_ACCEL;
-            velocity = MAX_VEL - (MAX_ACCEL * tDecel);
+        double p = (100 * path) / TARGET_POSITION;
+
+        moveBox(p / 100.0);
+    }
+
+    public void catchSpecimen() {
+        if(DriveTrain.canUp) {
+            moveLinear(450);
         }
-
-        return new MProfile(velocity, acceleration);
-    }
-
-    /**
-     * Class that holds the velocity and acceleration for each segment of the motion profile.
-     */
-    private static class MProfile {
-        double velocity;
-        double acceleration;
-
-        MProfile(double velocity, double acceleration) {
-            this.velocity = velocity;
-            this.acceleration = acceleration;
+        if(DriveTrain.canCatch) {
+            closeClaw();
+            moveLinear(650);
         }
     }
 
-    // Telemetry for monitoring
-    public void telemetry(Telemetry telemetry) {
-        telemetry.addData("LINEAR POWER", linear.getPower());
-        telemetry.addData("LINEAR TARGET", linear.getTargetPosition());
-        telemetry.addData("LINEAR POSITION", linear.getCurrentPosition());
-        telemetry.update();
+    public void clipSpecimen() {
+        moveLinear(960);
+        openClaw();
+    }
+
+    public void deliveryFunctions() {
+        switch(cycle) {
+            case BASKET:
+                break;
+            case CHAMBER:
+
+                switch(chamber) {
+                    case CATCH_SPECIMEN:
+                        catchSpecimen();
+                        break;
+                    case CLIP_SPECIMEN:
+                        clipSpecimen();
+                        break;
+
+                    case UP_LINEAR:
+                        moveLinear(1100);
+                        break;
+
+                    case IDLE:
+
+                        break;
+                }
+
+                break;
+
+            case IDLE:
+
+                break;
+        }
     }
 }

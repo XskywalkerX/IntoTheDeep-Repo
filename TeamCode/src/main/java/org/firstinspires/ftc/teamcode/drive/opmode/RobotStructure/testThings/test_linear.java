@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
+/*package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -62,7 +62,7 @@ public class test_linear extends LinearOpMode {
         servo = hardwareMap.get(Servo.class, "servo");
         pidCoefficients = new PIDCoefficients(kP, kI, kD);
         controller = new PIDFController(pidCoefficients, kV, kA, kStatic);
-        mp = new MProfile(pidCoefficients, controller, linear, MAX_VEL, MAX_ACCEL);
+        //mp = new MProfile(pidCoefficients, controller, linear, MAX_VEL, MAX_ACCEL);
 
         Thread motionProfile = new Thread(mp);
         linear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -164,3 +164,4 @@ public class test_linear extends LinearOpMode {
         motionProfile.interrupt();
     }
 }
+*/

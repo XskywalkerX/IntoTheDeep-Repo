@@ -18,6 +18,8 @@ import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -45,11 +47,12 @@ import java.util.Objects;
 @Autonomous(group = "drive")
 public class ManualFeedforwardTuner extends LinearOpMode {
     public static double DISTANCE = 64; // in
-        double MULTIPLIER = 1;
-
+    double MULTIPLIER = 1;
     private FtcDashboard dashboard = FtcDashboard.getInstance();
 
     private SampleMecanumDrive drive;
+
+    private DcMotorEx intake;
 
     enum Mode {
         DRIVER_MODE,
@@ -74,6 +77,9 @@ public class ManualFeedforwardTuner extends LinearOpMode {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
 
         drive = new SampleMecanumDrive(hardwareMap);
+        intake = hardwareMap.get(DcMotorEx.class, "motor_linear_front");
+
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         final VoltageSensor voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
@@ -96,6 +102,7 @@ public class ManualFeedforwardTuner extends LinearOpMode {
 
         while (!isStopRequested()) {
             telemetry.addData("mode", mode);
+            intake.setPower(0);
 
             switch (mode) {
                 case TUNING_MODE:

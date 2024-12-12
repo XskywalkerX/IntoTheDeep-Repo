@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Manager.Manager;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
@@ -17,16 +18,17 @@ import java.util.List;
 public class DriveTrain {
 
     public static List<Pose2d> lastPose = new ArrayList<>();
+    volatile public static boolean canUp = false;
+    volatile public static boolean canCatch = false;
 
     SampleMecanumDrive drive;
-
     Trajectory forward;
     Trajectory back;
     Trajectory left;
     Trajectory right;
 
     Trajectory line;
-    Trajectory spline;
+    TrajectorySequence spline;
 
     TrajectorySequence sequence;
 
@@ -91,13 +93,13 @@ public class DriveTrain {
         return line;
     }
 
-    public Trajectory goSpline
+    public TrajectorySequence goSpline
             (double finalX, double finalY,
              double finalH, double tangent,
              Pose2d START_POS
             ) {
 
-        spline = drive.trajectoryBuilder(START_POS)
+        spline = drive.trajectorySequenceBuilder(START_POS)
                 .splineToLinearHeading(new Pose2d(finalX, finalY, Math.toRadians(finalH)), Math.toRadians(tangent))
                 .build();
 
@@ -177,13 +179,26 @@ public class DriveTrain {
         lastPose.add(toSubmersibleZone.end());
     }
 
+    public void catchSpecimen() {
+        Delivery.chamber = Delivery.Chamber.CATCH_SPECIMEN;
+        Vector2d point = new Vector2d(0,0); //up linear
+        SpatialMarker marker = new SpatialMarker(point, () -> {
+            canUp = true;
+        });
+        Trajectory toObservationZone = goLine(marker,0,0, Math.toRadians(0), lastPose());
+        followTrajectory(toObservationZone);
+        canCatch = true;
+        lastPose.add(toObservationZone.end());
+    }
+
     public void toClip() {
         Vector2d point = new Vector2d(-20, 11);
         SpatialMarker marker = new SpatialMarker(point, () -> {
-           //clip
+            Delivery.chamber = Delivery.Chamber.UP_LINEAR;
         });
         Trajectory toClip = goLine(marker,-23.68, -11.37, 0, lastPose());
         drive.followTrajectoryAsync(toClip);
+        Delivery.chamber = Delivery.Chamber.CLIP_SPECIMEN;
         lastPose.add(toClip.end());
     }
 

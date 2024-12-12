@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
+/*package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -47,9 +47,9 @@ public class newMProfileTest extends LinearOpMode {
 
         motor = hardwareMap.get(DcMotorEx.class, "mprofile");
 
-        mp = new MProfile(coefficients, controller, motor, MAX_VEL, MAX_ACCEL);
+        //mp = new MProfile(coefficients, controller, motor, MAX_VEL, MAX_ACCEL);
 
-        Thread t1 = new Thread(mp);
+       Thread t1 = new Thread(mp);
 
         waitForStart();
 
@@ -77,4 +77,4 @@ public class newMProfileTest extends LinearOpMode {
         }
         t1.interrupt();
     }
-}
+}*/

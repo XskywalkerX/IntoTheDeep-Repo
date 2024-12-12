@@ -5,7 +5,7 @@ import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class MProfile implements Runnable {
+public class MProfile {
 
     volatile public double MAX_VEL, MAX_ACCEL, cp, tp;
 
@@ -23,14 +23,9 @@ public class MProfile implements Runnable {
     volatile public DcMotorEx motor;
 
     public MProfile(
-            PIDCoefficients coefficients,
-            PIDFController controller,
             DcMotorEx motor,
             double MAX_VEL,
             double MAX_ACCEL) {
-
-        this.controller = controller;
-        this.coefficients = coefficients;
 
         this.motor = motor;
 
@@ -60,33 +55,6 @@ public class MProfile implements Runnable {
         this.MAX_VEL = MAX_VEL;
         this.MAX_ACCEL = MAX_ACCEL;
     }
-
-    @Override
-    public void run() {
-
-        time.reset();
-
-        while (!Thread.currentThread().isInterrupted()) {
-
-            this.cp = motor.getCurrentPosition();
-            this.tp = motor.getTargetPosition();
-            System.out.println("CP IS " + this.cp + " | TP IS " + this.tp);
-            System.out.println(velocity);
-
-            if (cp < Math.abs(tp)) {
-                velocity = rectFunction(1.0 / 3.0, 0.422);
-            } else {
-                velocity = 0;
-            }
-            controller.setOutputBounds(0, MAX_VEL);
-            controller.setTargetAcceleration(acceleration);
-            controller.setTargetVelocity(velocity);
-            controller.setTargetPosition(tp);
-
-            motor.setVelocity(controller.update(cp, motor.getVelocity()));
-        }
-    }
-
 
     public double rectFunction(double accelPeriod, double decelPeriod) {
 

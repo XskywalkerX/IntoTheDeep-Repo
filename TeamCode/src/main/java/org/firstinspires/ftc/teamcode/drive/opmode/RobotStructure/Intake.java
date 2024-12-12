@@ -1,141 +1,185 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure;
 
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.blueArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.redArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.yellowArea;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.MAX_VEL;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.expansion;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.kA;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.kD;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.kI;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.kP;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.kStatic;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.kV;
+import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Intake.mp;
 
+import com.acmerobotics.roadrunner.control.PIDFController;
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.PIDController.PIDController;
 
+
+class IntakeThread implements Runnable {
+
+    @Override
+    public void run() {
+
+        double velocity = 0;
+
+        PIDCoefficients coefficients = new PIDCoefficients(kP, kI, kD);
+        PIDFController controller = new PIDFController(coefficients, kV, kA, kStatic);
+
+        while(!Thread.currentThread().isInterrupted()) {
+
+            double cp = expansion.getCurrentPosition();
+            double tp = expansion.getTargetPosition();
+
+            if (cp < Math.abs(tp)) {
+                velocity = mp.rectFunction(1.0 / 3.0, 0.422);
+            } else {
+                velocity = 0;
+            }
+            controller.setOutputBounds(0, MAX_VEL);
+            controller.setTargetAcceleration(mp.getAccel());
+            controller.setTargetVelocity(velocity);
+            controller.setTargetPosition(tp);
+
+            expansion.setVelocity(controller.update(cp, expansion.getVelocity()));
+        }
+    }
+}
 public class Intake {
 
-    public static double CONTROL = 1;
-    public static double DISTANCE = 5;
+    enum ExpansionState {
+        RETRACTED,
+        EXPANDED
+    }
 
-    public static double kp = 0;
-    public static double ki = 0;
-    public static double kd = 0;
+    enum ReaperState {
+        RUNNING,
+        IDLE
+    }
 
-    volatile public static boolean UP = false;
+    volatile public static double MAX_VEL = 2800;
+    volatile public static double MAX_ACCEL = 2800;
 
-    volatile public static boolean blueSide = false;
-    volatile public static boolean hasSample = false;
+    volatile public static double kP = 0;
+    volatile public static double kI = 0;
+    volatile public static double kD = 0;
 
-    volatile public static boolean expanded = false;
+    volatile public static double kV = 0;
+    volatile public static double kA = 0;
+    volatile public static double kStatic = 0;
+
+    volatile public static MProfile mp;
 
     public static double MULTIPLIER = 0.1;
-    public static int CATCH_COLOR = 0;
-    public static int CATCH_YELLOW = 0;
-    public static int CLOSED_ITK = 0;
-
-    DcMotorEx expansion;
-    DcMotorEx itk;
-    Servo HERE;
-    DistanceSensor itkSensor;
-
-    PIDController controller;
 
     HardwareMap hwMap;
 
-    public Intake(HardwareMap hwMap) {
+    //Motors
+    DcMotorEx reaper;
+    volatile public static DcMotorEx expansion;
 
+    //Servos
+    Servo itkLeft;
+    Servo itkRight;
+
+
+    // Sensors
+    DistanceSensor boxSensor;
+
+
+    volatile public static ExpansionState expansionState = ExpansionState.RETRACTED;
+    ReaperState reaperState = ReaperState.IDLE;
+
+    public Intake(HardwareMap hwMap) {
         this.hwMap = hwMap;
 
+        reaper = hwMap.get(DcMotorEx.class, "reaper");
         expansion = hwMap.get(DcMotorEx.class, "expansion");
-        itk = hwMap.get(DcMotorEx.class, "itk");
-        HERE = hwMap.get(Servo.class, "here");
-        itkSensor = hwMap.get(DistanceSensor.class, "itkSensor");
+        itkLeft = hwMap.get(Servo.class, "itkLeft");
+        itkRight = hwMap.get(Servo.class, "itkRight");
+        boxSensor = hwMap.get(DistanceSensor.class, "itkSensor");
 
-        itk.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        HERE.scaleRange(0.5, 1.0);
-
-        controller = new PIDController(kp, ki, kd);
+        mp = new MProfile(expansion, MAX_VEL, MAX_ACCEL);
     }
 
-    public void update() {
-        if (UP) {
-            controller.setTargetPosition(expansion.getTargetPosition());
-            controller.setCurrentPosition(expansion.getCurrentPosition());
-            expansion.setPower(controller.dice() / CONTROL);
+    /** AUTONOMOUS **/
+
+    //////////// SIMPLE MOVEMENTS ////////////
+
+    public void moveBox(double finalPos) {
+        itkLeft.setPosition(finalPos);
+        itkRight.setPosition(1 - finalPos);
+    }
+
+    public void downBox() {
+        moveBox(1.0);
+    }
+
+    public void upBox() {
+        moveBox(0.0);
+    }
+
+    public void moveExpansion(int TARGET_POSITION) {
+        expansion.setTargetPosition(TARGET_POSITION);
+    }
+
+    public void forwardExpansion() {
+        moveExpansion(700);
+    }
+
+    public void returnExpansion() {
+        moveExpansion(0);
+        upBox();
+    }
+
+
+    ///////////// COMPLEX MOVEMENTS /////////////
+
+    public void catchSample(double sampleWidth) {
+
+        double TARGET_POSITION = sampleWidth * MULTIPLIER;
+        moveExpansion((int) TARGET_POSITION);
+
+        double path = Math.abs(TARGET_POSITION - expansion.getCurrentPosition());
+
+        double p = (100 * path) / TARGET_POSITION;
+
+        moveBox(p / 100.0);
+    }
+
+    ////////////// STATE //////////////
+
+    public void intakeFunctions(double sampleWidth) {
+        switch(expansionState) {
+            case RETRACTED:
+
+                reaperState = ReaperState.IDLE;
+                returnExpansion();
+
+                break;
+            case EXPANDED:
+
+                reaperState = ReaperState.RUNNING;
+                catchSample(sampleWidth);
+
+                if(boxSensor.getDistance(DistanceUnit.CM) < 5.0) {
+                    expansionState = ExpansionState.RETRACTED;
+                }
+
+                break;
         }
 
-        hasSample = itkSensor.getDistance(DistanceUnit.CM) <= DISTANCE;
-    }
-
-
-    //movements
-    public void expand(boolean blueSide) {
-        CATCH_COLOR = blueSide ? (int) (blueArea * MULTIPLIER) : (int) (redArea * MULTIPLIER);
-        CATCH_YELLOW = (int) (yellowArea * MULTIPLIER);
-        getExpansion().setTargetPosition(Math.min(CATCH_COLOR, CATCH_YELLOW));
-    }
-
-    public void catchYellow() {
-        CATCH_YELLOW = (int) (yellowArea * MULTIPLIER);
-        getExpansion().setTargetPosition(Math.min(CATCH_COLOR, CATCH_YELLOW));
-    }
-
-    public void spin() {
-        itk.setPower(hasSample ? 0 : 1);
-    }
-
-    public void closeExpansion() {
-        getExpansion().setTargetPosition(CLOSED_ITK);
-    }
-
-    public void downClaw() {
-        HERE.setPosition(1);
-    }
-
-    public void upClaw() {
-        HERE.setPosition(0);
-    }
-
-
-    //complex movements
-    public void catchSample() {
-        catchYellow();
-        if (getExpansion().getCurrentPosition() >= getExpansion().getTargetPosition() * 0.25) {
-            downClaw();
-            spin();
+        switch (reaperState) {
+            case RUNNING:
+                reaper.setPower(0.7);
+                break;
+            case IDLE:
+                reaper.setPower(0.0);
+                break;
         }
-    }
-
-    public void catchTeleOp() {
-        expand(blueSide);
-        if (getExpansion().getCurrentPosition() >= getExpansion().getTargetPosition() * 0.25) {
-            downClaw();
-            spin();
-        }
-    }
-
-    public void returnIntake() {
-        upClaw();
-        closeExpansion();
-    }
-
-
-    //get
-    public DcMotorEx getExpansion() {
-        return expansion;
-    }
-
-    public DcMotorEx getItk() {
-        return itk;
-    }
-
-    public void telemetry(Telemetry telemetry) {
-        telemetry.addData("INTAKE POWER", expansion.getPower());
-        telemetry.addData("INTAKE TARGET", expansion.getTargetPosition());
-        telemetry.addData("INTAKE POSITION", expansion.getCurrentPosition());
-        telemetry.update();
     }
 }

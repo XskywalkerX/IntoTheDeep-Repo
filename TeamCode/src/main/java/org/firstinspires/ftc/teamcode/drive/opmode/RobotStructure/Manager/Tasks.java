@@ -5,6 +5,10 @@ public enum Tasks {
     DELIVERY_BASKET("D_BASKET"),
     DELIVERY_OBS_ZONE("D_OBS_ZONE"),
     CLIP_SPECIMEN("CLIP_SPECIMEN"),
+    CATCH_SPECIMEN("CATCH_SPECIMEN"),
+    SPIKE_MARK_1("SPIKE_MARK_1"),
+    SPIKE_MARK_2("SPIKE_MARK_2"),
+    SPIKE_MARK_3("SPIKE_MARK_3"),
     PARK("PARK");
     public final String TaskName;
 
