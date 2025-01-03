@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Robot;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -15,17 +17,30 @@ public class main extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
+
         robot = new Robot(hardwareMap);
+
+        while(!isStarted()) {
+            robot.readData(telemetry);
+        }
 
         waitForStart();
 
         timer.reset();
 
         while(opModeIsActive()) {
+
             if (timer.milliseconds() > UPDATE_INTERVAL_MS) {
                 robot.sendData();
                 timer.reset();
             }
+
+            telemetry.addData("FRONT LEFT DIRECTION", robot.getDrive().getFrontLeft().getDirection());
+            telemetry.addData("FRONT ENCODER DIRECTION", robot.getDrive().getFrontEncoder().getDirection());
+            telemetry.update();
+
             robot.getDrive().setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,
