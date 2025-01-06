@@ -20,7 +20,7 @@ public class main extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
-        robot = new Robot(hardwareMap);
+        robot = new Robot(hardwareMap, gamepad1, gamepad2);
 
         while(!isStarted()) {
             robot.readData(telemetry);

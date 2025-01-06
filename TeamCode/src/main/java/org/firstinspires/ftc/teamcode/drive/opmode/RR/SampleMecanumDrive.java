@@ -43,6 +43,7 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceRunner;
+import org.firstinspires.ftc.teamcode.util.Encoder;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 
 import java.util.ArrayList;
@@ -56,6 +57,8 @@ import java.util.List;
 public class SampleMecanumDrive extends MecanumDrive {
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(7, 0, 1.1);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(7, 0, 1.1);
+
+    StandardTrackingWheelLocalizer standardTrackingWheelLocalizer;
 
     public static double LATERAL_MULTIPLIER = 0.97111468485;
 
@@ -131,13 +134,15 @@ public class SampleMecanumDrive extends MecanumDrive {
         leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
         leftRear.setDirection(DcMotorSimple.Direction.FORWARD);
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightRear.setDirection(DcMotorSimple.Direction.REVERSE      );
+        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         List<Integer> lastTrackingEncPositions = new ArrayList<>();
         List<Integer> lastTrackingEncVels = new ArrayList<>();
 
+        standardTrackingWheelLocalizer = new StandardTrackingWheelLocalizer(hardwareMap, lastTrackingEncPositions, lastTrackingEncVels);
+
         // TODO: if desired, use setLocalizer() to change the localization method
-        setLocalizer(new StandardTrackingWheelLocalizer(hardwareMap, lastTrackingEncPositions, lastTrackingEncVels));
+        setLocalizer(standardTrackingWheelLocalizer);
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
                 follower, HEADING_PID, batteryVoltageSensor,
@@ -379,6 +384,18 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public DcMotor getBackRight() {
         return rightRear;
+    }
+
+    public Encoder getLeftEncoder() {
+        return standardTrackingWheelLocalizer.getLeftEncoder();
+    }
+
+    public Encoder getRightEncoder() {
+        return standardTrackingWheelLocalizer.getRightEncoder();
+    }
+
+    public Encoder getFrontEncoder() {
+        return standardTrackingWheelLocalizer.getFrontEncoder();
     }
 }
   

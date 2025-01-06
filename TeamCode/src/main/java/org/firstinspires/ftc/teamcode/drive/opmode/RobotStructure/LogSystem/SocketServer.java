@@ -12,8 +12,8 @@ import java.util.List;
 public class SocketServer extends WebSocketServer {
     private static List<WebSocket> clients = new ArrayList<>();  // Keep track of connected clients
 
-    public SocketServer() {
-        super(new InetSocketAddress("192.168.43.1", 17802));  // Server address and port
+    public SocketServer(int port) {
+        super(new InetSocketAddress("192.168.43.1", port));  // Server address and port
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.InetAddress;
 import java.util.Iterator;
 
 public class Robot {
@@ -40,9 +42,13 @@ public class Robot {
     VoltageSensor voltageSensor;
     LynxModule controlHub;
 
-    public Robot(HardwareMap hwMap) {
+    Gamepad gamepad1, gamepad2;
+
+    public Robot(HardwareMap hwMap, Gamepad gamepad1, Gamepad gamepad2) {
 
         this.hwMap = hwMap;
+        this.gamepad1 = gamepad1;
+        this.gamepad2 = gamepad2;
 
         drive = new SampleMecanumDrive(hwMap);
         voltageSensor = hwMap.voltageSensor.get("Control Hub");  // Get the battery voltage sensor
@@ -144,45 +150,28 @@ public class Robot {
         }
     }
 
-    public void receiveData(Telemetry telemetry) {
-        synchronized (SocketServer.class) {
-            for (WebSocket client : socketServer2.getConnections()) {
-                try {
-                    // Get the last message for the current client
-                    String receivedMessage = socketServer2.getLastMessage(client);
-
-                    if (receivedMessage != null && isValidJSON(receivedMessage)) {
-                        JSONObject config = new JSONObject(receivedMessage);
-
-                        // Parse the JSON and display via telemetry
-                        telemetry.addLine("Received Configuration:");
-                        Iterator<String> keys = config.keys();
-                        while (keys.hasNext()) {
-                            String key = keys.next();
-                            telemetry.addData(key, config.get(key));
-                        }
-                        telemetry.update();
-                    }
-                } catch (Exception e) {
-                    telemetry.addLine("Error parsing message from client.");
-                    telemetry.update();
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private boolean isValidJSON(String message) {
-        try {
-            new JSONObject(message);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
 
     public void sendData() {
+
+        StringBuilder warnings = new StringBuilder();
+
+        if (!checkEncoder(drive.getFrontEncoder())) {
+            warnings.append("Front Encoder disconnected.\n");
+        }
+        if (!checkEncoder(drive.getLeftEncoder())) {
+            warnings.append("Left Encoder disconnected.\n");
+        }
+        if (!checkEncoder(drive.getRightEncoder())) {
+            warnings.append("Right Encoder disconnected.\n");
+        }
+        if(gamepad1.getGamepadId() == -1) {
+            warnings.append("Gamepad 1 disconnected.\n");
+        }
+        if(gamepad2.getGamepadId() == -1) {
+            warnings.append("Gamepad 2 disconnected.\n");
+        }
+
+
         // Retrieve IMU data
         double rotX = imu.getAngularOrientation().firstAngle;
         double rotY = imu.getAngularOrientation().secondAngle;
@@ -191,6 +180,14 @@ public class Robot {
         // Control Status data
         double batteryVoltage = voltageSensor.getVoltage();
         double temperature = controlHub.getTemperature(TempUnit.CELSIUS);
+
+        if (batteryVoltage < 12.0) {
+            warnings.append("Warning: Battery voltage is low (" + batteryVoltage + "V).\n");
+        }
+
+        if (warnings.length() == 0) {
+            warnings.append("All systems operational.\n");
+        }
 
         // Chassis motors data
         double flPower = drive.getFrontLeft().getPower() * 100;
@@ -204,9 +201,11 @@ public class Robot {
                 {-1, 0, 0}  // k-axis
         };
 
-
         double memoryUsage = getMemoryUsage();
         double cpuUsage = getCpuUsage();
+
+
+        double ping = getPing("192.168.43.1");
 
         JSONObject data = new JSONObject();
         try {
@@ -239,6 +238,9 @@ public class Robot {
 
             data.put("cpu", cpuUsage);
             data.put("memory", memoryUsage);
+            data.put("ping", ping);
+
+            data.put("Warning", warnings);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -322,6 +324,32 @@ public class Robot {
         } catch (Exception e) {
             e.printStackTrace();
             return 0.0;
+        }
+    }
+
+    public static long getPing(String ipAddress) {
+        try {
+            InetAddress inet = InetAddress.getByName(ipAddress);
+            long startTime = System.nanoTime();
+            boolean reachable = inet.isReachable(1000); // Timeout of 1000ms
+            long endTime = System.nanoTime();
+
+            if (reachable) {
+                return (endTime - startTime) / 1_000_000; // Convert nanoseconds to milliseconds
+            } else {
+                return -1; // Return -1 if not reachable
+            }
+        } catch (Exception e) {
+            return -1; // Return -1 for errors
+        }
+    }
+
+    //checkers
+    private boolean checkEncoder(Encoder encoder) {
+        if(drive.isBusy()) {
+            return encoder.getCorrectedVelocity() != 0;
+        } else {
+            return true;
         }
     }
 }

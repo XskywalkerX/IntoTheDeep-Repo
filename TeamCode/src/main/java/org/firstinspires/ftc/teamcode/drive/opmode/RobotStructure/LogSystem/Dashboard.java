@@ -25,7 +25,7 @@ public class Dashboard extends LinearOpMode {
 
         try {
             logDash = new LogDash();  // Initialize LogDash (HTTP server)
-            socketServer = new SocketServer();  // Initialize WebSocket server on port 17802
+            socketServer = new SocketServer(17802);  // Initialize WebSocket server on port 17802
             socketServer.start();  // Start the WebSocket server
         } catch (Exception e) {
             telemetry.addData("Error", "Server couldn't start: " + e.getMessage());
