@@ -44,7 +44,7 @@ public class IMUOpMode extends LinearOpMode {
         // connectWebSocket();
         try {
             dash = new Dash();
-            client = new SocketServer();
+            client = new SocketServer(17802);
             client.start();
         } catch (Exception e) {
             throw new RuntimeException(e);

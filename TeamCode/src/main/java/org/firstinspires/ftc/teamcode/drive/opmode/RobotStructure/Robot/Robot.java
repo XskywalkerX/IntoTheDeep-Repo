@@ -34,6 +34,8 @@ public class Robot {
 
     HardwareMap hwMap;
 
+    State state;
+
     SampleMecanumDrive drive;
     Dash dash;
     SocketServer socketServer;
@@ -49,6 +51,8 @@ public class Robot {
         this.hwMap = hwMap;
         this.gamepad1 = gamepad1;
         this.gamepad2 = gamepad2;
+
+        state = State.IDLE;
 
         drive = new SampleMecanumDrive(hwMap);
         voltageSensor = hwMap.voltageSensor.get("Control Hub");  // Get the battery voltage sensor
@@ -171,11 +175,13 @@ public class Robot {
             warnings.append("Gamepad 2 disconnected.\n");
         }
 
-
         // Retrieve IMU data
         double rotX = imu.getAngularOrientation().firstAngle;
         double rotY = imu.getAngularOrientation().secondAngle;
         double rotZ = imu.getAngularOrientation().thirdAngle;
+
+        //change state
+        state = (rotY > 40 || rotY < -40) ? State.LIFTED : State.IDLE;
 
         // Control Status data
         double batteryVoltage = voltageSensor.getVoltage();
@@ -239,6 +245,8 @@ public class Robot {
             data.put("cpu", cpuUsage);
             data.put("memory", memoryUsage);
             data.put("ping", ping);
+
+            data.put("state", state.stateName);
 
             data.put("Warning", warnings);
         } catch (JSONException e) {
@@ -342,6 +350,10 @@ public class Robot {
         } catch (Exception e) {
             return -1; // Return -1 for errors
         }
+    }
+
+    public BNO055IMU getIMU() {
+        return imu;
     }
 
     //checkers
