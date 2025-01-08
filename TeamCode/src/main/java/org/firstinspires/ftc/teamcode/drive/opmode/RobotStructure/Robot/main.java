@@ -38,7 +38,9 @@ public class main extends LinearOpMode {
             }
 
             telemetry.addData("FRONT LEFT DIRECTION", robot.getDrive().getFrontLeft().getDirection());
-            telemetry.addData("FRONT ENCODER DIRECTION", robot.getDrive().getFrontEncoder().getDirection());
+            telemetry.addData("FRONT RIGHT DIRECTION", robot.getDrive().getFrontRight().getDirection());
+            telemetry.addData("BACK LEFT DIRECTION", robot.getDrive().getBackLeft().getDirection());
+            telemetry.addData("BACK RIGHT DIRECTION", robot.getDrive().getBackRight().getDirection());
             telemetry.addData("rotY", robot.getIMU().getAngularOrientation().secondAngle);
             telemetry.update();
 

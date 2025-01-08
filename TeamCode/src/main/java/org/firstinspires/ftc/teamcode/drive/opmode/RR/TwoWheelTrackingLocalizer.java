@@ -9,8 +9,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.util.Encoder;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /*
@@ -36,18 +42,18 @@ import java.util.List;
  */
 @Config
 public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
-    public static double TICKS_PER_REV = 8192;
-    public static double WHEEL_RADIUS = 1.6; // in
+    public static double TICKS_PER_REV = 2000;
+    public static double WHEEL_RADIUS = 0.944882; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double PARALLEL_X = 1; // X is the up and down direction
-    public static double PARALLEL_Y = 7; // Y is the strafe direction
+    public static double PARALLEL_X = 2; // X is the up and down direction
+    public static double PARALLEL_Y = -6.729050223; // Y is the strafe direction
 
-    public static double PERPENDICULAR_X = -6;
-    public static double PERPENDICULAR_Y = 2;
+    public static double PERPENDICULAR_X = 2.72440944882;
+    public static double PERPENDICULAR_Y = -1;
 
-    public static double X_MULTIPLIER = 0.40913843241;
-    public static double Y_MULTIPLIER = 0.40362669701;
+    public static double X_MULTIPLIER = 0.932491482;
+    public static double Y_MULTIPLIER = 1.020739502;
 
     // Parallel/Perpendicular to the forward axis
     // Parallel wheel is parallel to the forward axis
@@ -64,11 +70,11 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
         this.drive = drive;
 
-        parallelEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "backRight"));
+        parallelEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "backLeft"));
         perpendicularEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "frontRight"));
 
         // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
-        perpendicularEncoder.setDirection(Encoder.Direction.REVERSE);
+        readData();
     }
 
     public static double encoderTicksToInches(double ticks) {
@@ -105,5 +111,63 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
                 encoderTicksToInches(parallelEncoder.getCorrectedVelocity()) * X_MULTIPLIER,
                 encoderTicksToInches(perpendicularEncoder.getCorrectedVelocity()) * Y_MULTIPLIER
         );
+    }
+
+
+    public void readData() {
+        String jsonData = readJSONFromFile();
+        if (jsonData != null) {
+            try {
+                // Parse the JSON string
+                JSONObject config = new JSONObject(jsonData);
+
+                setEncoderDirection(parallelEncoder,
+                        config.optString("rightdeadWheelDir", "FORWARD"));
+                setEncoderDirection(perpendicularEncoder,
+                        config.optString("frontdeadWheelDir", "FORWARD"));
+
+                // Example: Print keys from the JSON to telemetry
+                Iterator<String> keys = config.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                }
+            } catch (Exception e) {
+                ;
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String readJSONFromFile() {
+        StringBuilder jsonData = new StringBuilder();
+        try {
+            File file = new File("/sdcard/TAMOPORCA/config.json");  // File path on Control Hub
+            if (file.exists()) {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    jsonData.append(line);  // Append each line to the StringBuilder
+                }
+                reader.close();
+                return jsonData.toString();
+            } else {
+                System.out.println("File not found: " + file.getAbsolutePath());
+                return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error reading JSON from file");
+            return null;
+        }
+    }
+
+    private void setEncoderDirection(Encoder encoder, String direction) {
+        if (direction.equalsIgnoreCase("FORWARD")) {
+            encoder.setDirection(Encoder.Direction.FORWARD);
+        } else if (direction.equalsIgnoreCase("REVERSE")) {
+            encoder.setDirection(Encoder.Direction.REVERSE);
+        } else {
+            encoder.setDirection(Encoder.Direction.FORWARD);
+        }
     }
 }

@@ -58,12 +58,7 @@ public class Robot {
         voltageSensor = hwMap.voltageSensor.get("Control Hub");  // Get the battery voltage sensor
         controlHub = hwMap.get(LynxModule.class, "Control Hub");
 
-        imu = hwMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        imu.initialize(parameters);
+        imu = drive.getImu();
 
         initServer();
     }
@@ -358,8 +353,17 @@ public class Robot {
 
     //checkers
     private boolean checkEncoder(Encoder encoder) {
-        if(drive.isBusy()) {
+        if(drive.getFrontLeft().getPower() != 0 || drive.getBackLeft().getPower() != 0
+        || drive.getFrontRight().getPower() != 0 || drive.getBackRight().getPower() != 0) {
             return encoder.getCorrectedVelocity() != 0;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean checkMotor(DcMotorEx motor) {
+        if(motor.getPower() != 0) {
+            return motor.getVelocity() != 0;
         } else {
             return true;
         }

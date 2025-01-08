@@ -32,22 +32,32 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAcceleration
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceRunner;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /*
@@ -55,12 +65,13 @@ import java.util.List;
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(7, 0, 1.1);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(7, 0, 1.1);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(9, 0, 0.6);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(9, 0, 0.6);
 
     StandardTrackingWheelLocalizer standardTrackingWheelLocalizer;
+    TwoWheelTrackingLocalizer twoWheelTrackingLocalizer;
 
-    public static double LATERAL_MULTIPLIER = 0.97111468485;
+    public static double LATERAL_MULTIPLIER = 0.916666667;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -91,7 +102,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 1.5);
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
@@ -102,10 +113,6 @@ public class SampleMecanumDrive extends MecanumDrive {
         }
 
         // TODO: adjust the names of the following hardware devices to match your configuration
-        /*imu = hardwareMap.get(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);*/
 
         leftFront = hardwareMap.get(DcMotorEx.class, "frontLeft");
         leftRear = hardwareMap.get(DcMotorEx.class, "backLeft");
@@ -130,29 +137,26 @@ public class SampleMecanumDrive extends MecanumDrive {
             setPIDFCoefficients(DcMotor.RunMode.RUN_WITHOUT_ENCODER, MOTOR_VELO_PID);
         }
 
-        // TODO: reverse any motors using DcMotor.setDirection()
-        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftRear.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        readData();
 
         List<Integer> lastTrackingEncPositions = new ArrayList<>();
         List<Integer> lastTrackingEncVels = new ArrayList<>();
 
         standardTrackingWheelLocalizer = new StandardTrackingWheelLocalizer(hardwareMap, lastTrackingEncPositions, lastTrackingEncVels);
-
+        twoWheelTrackingLocalizer = new TwoWheelTrackingLocalizer(hardwareMap, this);
         // TODO: if desired, use setLocalizer() to change the localization method
-        setLocalizer(standardTrackingWheelLocalizer);
+        //setLocalizer(standardTrackingWheelLocalizer);
+        setLocalizer(twoWheelTrackingLocalizer);
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
                 follower, HEADING_PID, batteryVoltageSensor,
                 lastEncPositions, lastEncVels, lastTrackingEncPositions, lastTrackingEncVels
         );
 
-        /*imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        imu.initialize(parameters);*/
+        imu.initialize(parameters);
     }
 
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
@@ -332,8 +336,9 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public double getRawExternalHeading() {
-        return 0;
+        return imu.getAngularOrientation().firstAngle;
     }
+
 
     @Override
     public Double getExternalHeadingVelocity() {
@@ -355,7 +360,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         // Rotate about the z axis is the default assuming your REV Hub/Control Hub is laying
         // flat on a surface
 
-        return 0.0;
+        return (double) imu.getAngularVelocity().zRotationRate;
     }
 
     public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
@@ -367,6 +372,69 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
+    }
+
+    public void readData() {
+        String jsonData = readJSONFromFile();
+        if (jsonData != null) {
+            try {
+                // Parse the JSON string
+                JSONObject config = new JSONObject(jsonData);
+
+                setMotorDirection(
+                        getFrontLeft(),
+                        config.optString("frontLeftDir", "FORWARD"));
+                setMotorDirection(getFrontRight(),
+                        config.optString("frontRightDir", "FORWARD"));
+                setMotorDirection(getBackLeft(),
+                        config.optString("backLeftDir", "FORWARD"));
+                setMotorDirection(getBackRight(),
+                        config.optString("backRightDir", "FORWARD"));
+
+                // Example: Print keys from the JSON to telemetry
+                Iterator<String> keys = config.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                }
+            } catch (Exception e) {
+                ;
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String readJSONFromFile() {
+        StringBuilder jsonData = new StringBuilder();
+        try {
+            File file = new File("/sdcard/TAMOPORCA/config.json");  // File path on Control Hub
+            if (file.exists()) {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    jsonData.append(line);  // Append each line to the StringBuilder
+                }
+                reader.close();
+                return jsonData.toString();
+            } else {
+                System.out.println("File not found: " + file.getAbsolutePath());
+                return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error reading JSON from file");
+            return null;
+        }
+    }
+
+
+    private void setMotorDirection(DcMotor motor, String direction) {
+        if (direction.equalsIgnoreCase("FORWARD")) {
+            motor.setDirection(DcMotor.Direction.FORWARD);
+        } else if (direction.equalsIgnoreCase("REVERSE")) {
+            motor.setDirection(DcMotor.Direction.REVERSE);
+        } else {
+            motor.setDirection(DcMotor.Direction.FORWARD);
+        }
     }
 
 
@@ -396,6 +464,10 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public Encoder getFrontEncoder() {
         return standardTrackingWheelLocalizer.getFrontEncoder();
+    }
+
+    public BNO055IMU getImu() {
+        return imu;
     }
 }
   
