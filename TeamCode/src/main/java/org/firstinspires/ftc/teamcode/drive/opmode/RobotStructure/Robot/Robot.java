@@ -273,6 +273,7 @@ public class Robot {
 
     private void setEncoderDirection(Encoder encoder, String direction) {
         if (direction.equalsIgnoreCase("FORWARD")) {
+            System.out.println("blablabla");
             encoder.setDirection(Encoder.Direction.FORWARD);
         } else if (direction.equalsIgnoreCase("REVERSE")) {
             encoder.setDirection(Encoder.Direction.REVERSE);
