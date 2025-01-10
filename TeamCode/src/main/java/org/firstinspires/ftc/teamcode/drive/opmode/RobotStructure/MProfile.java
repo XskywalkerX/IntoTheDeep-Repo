@@ -73,7 +73,7 @@ public class MProfile implements Runnable {
             System.out.println("CP IS " + this.cp + " | TP IS " + this.tp);
             System.out.println(velocity);
 
-            if (cp < Math.abs(tp)) {
+            if (cp != tp) {
                 velocity = rectFunction(1.0 / 3.0, 0.422);
             } else {
                 velocity = 0;
@@ -96,23 +96,44 @@ public class MProfile implements Runnable {
 
         double dRemaining = tp - cp;
 
-        if (dRemaining > (dAccel + dCruise)) {
-            System.out.println("ACCEL");
-            acceleration = MAX_ACCEL;
-            velocity = cp > 0 ? Math.sqrt(2 * MAX_ACCEL * cp) : Math.sqrt(2 * MAX_ACCEL * 0.1);
-            //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
-            distance = 0.5 * acceleration * cp * cp;
-        } else if (dRemaining > ddDecel) {
-            System.out.println("CRUISE");
-            acceleration = 0;
-            velocity = MAX_VEL;
-            distance = dAccel + MAX_VEL * (cp - dAccel);
-        } else {
-            System.out.println("DECEL");
-            double dDecel = tp - cp;
-            acceleration = -MAX_ACCEL;
-            velocity = Math.sqrt(2 * MAX_ACCEL * dDecel);
-            distance = tp - 0.5 * acceleration * (dRemaining * dRemaining);
+        if (dRemaining > 0) {
+            if (dRemaining > (dAccel + dCruise)) {
+                System.out.println("ACCEL");
+                acceleration = MAX_ACCEL;
+                velocity = cp > 0 ? Math.sqrt(2 * MAX_ACCEL * cp) : Math.sqrt(2 * MAX_ACCEL * 0.1);
+                //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
+                distance = 0.5 * acceleration * cp * cp;
+            } else if (dRemaining > ddDecel) {
+                System.out.println("CRUISE");
+                acceleration = 0;
+                velocity = MAX_VEL;
+                distance = dAccel + MAX_VEL * (cp - dAccel);
+            } else {
+                System.out.println("DECEL");
+                double dDecel = tp - cp;
+                acceleration = -MAX_ACCEL;
+                velocity = Math.sqrt(2 * MAX_ACCEL * dDecel);
+                distance = tp - 0.5 * acceleration * (dRemaining * dRemaining);
+            }
+        } else if(dRemaining < 0) {
+            if (Math.abs(dRemaining) > (dAccel + dCruise)) {
+                System.out.println("ACCEL");
+                acceleration = -MAX_ACCEL;
+                velocity = cp > 0 ? -Math.sqrt(2 * MAX_ACCEL * cp) : -Math.sqrt(2 * MAX_ACCEL * 0.1);
+                //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
+                distance = 0.5 * acceleration * cp * cp;
+            } else if (Math.abs(dRemaining) > ddDecel) {
+                System.out.println("CRUISE");
+                acceleration = 0;
+                velocity = -MAX_VEL;
+                distance = dAccel + MAX_VEL * (cp - dAccel);
+            } else {
+                System.out.println("DECEL");
+                double dDecel = Math.abs(tp - cp);
+                acceleration = -MAX_ACCEL;
+                velocity = -Math.sqrt(2 * MAX_ACCEL * dDecel);
+                distance = tp - 0.5 * acceleration * (dRemaining * dRemaining);
+            }
         }
 
         return velocity;
