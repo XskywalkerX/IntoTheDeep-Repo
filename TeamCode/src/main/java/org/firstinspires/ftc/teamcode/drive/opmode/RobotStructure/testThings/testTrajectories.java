@@ -66,58 +66,48 @@ public class testTrajectories extends LinearOpMode {
                 .addSpatialMarker(clip1, () -> {
                     //clip first specimen
                     telemetry.addLine("CLIPPING FIRST SPECIMEN");
-                    clip();
                 })
                 .lineToConstantHeading(new Vector2d(-7.52, 31.70))
                 .addSpatialMarker(catch1, () -> {
                     //catch second specimen
                     telemetry.addLine("CATCHING SECOND SPECIMEN");
-                    c4tch();
                 })
                 .lineToConstantHeading(new Vector2d(-44.55, 60.99))
                 .addSpatialMarker(p1, () -> {
                     //move delivery to idle
                     telemetry.addLine("MOVING DELIVERY TO IDLE");
-                    deliveryToIdle();
                 })
                 .addSpatialMarker(clip2, () -> {
                     //clip second specimen
                     telemetry.addLine("CLIPPING SECOND SPECIMEN");
-                    clip();
                 })
                 .lineToConstantHeading(new Vector2d(-2.07, 32.13))
                 .addSpatialMarker(catch2, () -> {
                     //catch third specimen
                     telemetry.addLine("CATCHING THIRD SPECIMEN");
-                    c4tch();
                 })
                 .lineToConstantHeading(new Vector2d(-44.55, 60.21))
                 .addSpatialMarker(p1, () -> {
                     //move delivery to idle
                     telemetry.addLine("MOVING DELIVERY TO IDLE");
-                    deliveryToIdle();
                 })
                 .addSpatialMarker(clip3, () -> {
                     //clip third specimen
                     telemetry.addLine("CLIPPING THIRD SPECIMEN");
-                    clip();
                 })
                 .lineToConstantHeading(new Vector2d(2.51, 31.92))
                 .addSpatialMarker(catch3, () -> {
                     //catch fourth specimen
                     telemetry.addLine("CATCHING FOURTH SPECIMEN");
-                    c4tch();
                 })
                 .lineToConstantHeading(new Vector2d(-44.55, 60.99))
                 .addSpatialMarker(p1, () -> {
                     //move delivery to idle
                     telemetry.addLine("MOVING DELIVERY TO IDLE");
-                    deliveryToIdle();
                 })
                 .addSpatialMarker(clip4, () -> {
                     //clip fourth specimen
                     telemetry.addLine("CLIPPING FOURTH SPECIMEN");
-                    clip();
                 })
                 .lineToConstantHeading(new Vector2d(6.43, 32.35))
                 .build();
