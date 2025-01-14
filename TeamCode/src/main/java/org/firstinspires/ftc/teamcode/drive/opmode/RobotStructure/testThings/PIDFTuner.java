@@ -7,42 +7,54 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.MProfile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @TeleOp
 @Config
 public class PIDFTuner extends LinearOpMode {
 
-    PIDCoefficients pidCoefficients = new PIDCoefficients(kP, kI, kD);
-    PIDFController pidfController = new PIDFController(pidCoefficients, kV, kA, kStatic);
+    double integralSum = 0;
+    double lastError = 0;
 
     MProfile mp;
 
+    List<Integer> lastPositions = new ArrayList<>();
+
     volatile public static DcMotorEx linear;
+
 
     public static double TARGET = 0.7;
 
-    volatile public static double kP = 0.05;
+    volatile public static double kP = 0.9;
     volatile public static double kI = 0;
-    volatile public static double kD = 0;
+    volatile public static double kD = 0.5;
+    volatile public static double kF = 1.1;
 
-    public static double kV = 0.000111607;
-    public static double kA = 0.0002;
-    public static double kStatic = 0;
-
-    public static double MAX_VEL = 8960.0;
-    public static double MAX_ACCEL = 2000.0;
+    public static double MAX_VEL = 2664;
+    public static double MAX_ACCEL = 2000;
 
     volatile public static int tp = 5000;
+
+    volatile public double acceleration = 0;
+    volatile public double velocity = 0;
+    volatile public double distance = 0;
+    volatile public double error = 0;
 
     Servo arm;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        ElapsedTime time = new ElapsedTime();
 
         linear = hardwareMap.get(DcMotorEx.class, "linear");
         arm = hardwareMap.get(Servo.class, "arm");
@@ -52,25 +64,117 @@ public class PIDFTuner extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
-        mp = new MProfile(pidCoefficients, pidfController, linear, MAX_VEL, MAX_ACCEL);
+        linear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        Thread t1 = new Thread(mp);
-
-        waitForStart();
-        t1.start();
-        while(opModeIsActive()) {
-
-            pidCoefficients = new PIDCoefficients(kP, kI, kD);
-            pidfController = new PIDFController(pidCoefficients, kV, kA, kStatic);
-
-            arm.setPosition(TARGET);
-            linear.setTargetPosition(tp);
-
-            telemetry.addData("TARGET VEL", mp.getVelocity());
+        while(!isStarted()) {
+            telemetry.addData("TARGET VEL", velocity);
             telemetry.addData("CURRENT VEL", linear.getVelocity());
             telemetry.addData("CURRENT POSITION", linear.getCurrentPosition());
+            telemetry.addData("ERROR", error);
             telemetry.update();
         }
-        t1.interrupt();
+
+        waitForStart();
+
+        lastPositions.add(linear.getCurrentPosition());
+
+        while(opModeIsActive()) {
+
+            error = tp - linear.getCurrentPosition();
+
+            arm.setPosition(TARGET);
+
+            double targetVelocity = rectFunction(1.0 / 3.0, 1.0 / 3.0);
+
+            linear.setVelocity(PIDFController(targetVelocity, linear.getVelocity(), time.seconds()));
+
+            telemetry.addData("TARGET VEL", velocity);
+            telemetry.addData("CURRENT VEL", linear.getVelocity());
+            telemetry.addData("CURRENT POSITION", linear.getCurrentPosition());
+            telemetry.addData("ERROR", error);
+            telemetry.update();
+        }
+    }
+
+    public double rectFunction(double accelPeriod, double decelPeriod) {
+
+        double cp = linear.getCurrentPosition();
+
+        double d = tp - lastPositions.get(lastPositions.size() - 1);
+
+        double dAccel = accelPeriod * (d);
+        double ddDecel = decelPeriod * (d);
+        double dCruise = (tp - (dAccel + ddDecel));
+
+        double dRemaining = tp - cp;
+
+        telemetry.addData("dRemaining", dRemaining);
+        telemetry.addData("dAccel", dAccel);
+        telemetry.addData("dCruise", dCruise);
+        telemetry.addData("ddDecel", ddDecel);
+        telemetry.update();
+
+        if (d > 0) {
+            if (dRemaining > (dAccel + dCruise)) {
+                System.out.println("ACCEL");
+                telemetry.addLine("ACCEL");
+                acceleration = MAX_ACCEL;
+                velocity = cp > 0 ? Math.sqrt(2 * MAX_ACCEL * cp) : Math.sqrt(2 * MAX_ACCEL * 0.001);
+                //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
+                distance = 0.5 * acceleration * cp * cp;
+            } else if (dRemaining > ddDecel) {
+                System.out.println("CRUISE");
+                telemetry.addLine("CRUISE");
+                acceleration = 0;
+                velocity = Math.sqrt(2 * MAX_ACCEL * dCruise);
+                distance = dAccel + MAX_VEL * (cp - dAccel);
+            } else {
+                System.out.println("DECEL");
+                telemetry.addLine("DECEL");
+                double dDecel = tp - cp;
+                acceleration = -MAX_ACCEL;
+                velocity = Math.sqrt(2 * MAX_ACCEL * error);
+                distance = tp - 0.5 * acceleration * (dRemaining * dRemaining);
+            }
+        } else if(d < 0) {
+            if (Math.abs(dRemaining) > Math.abs(dAccel + dCruise)) {
+                System.out.println("ACCEL");
+                telemetry.addLine("ACCEL");
+                acceleration = MAX_ACCEL;
+                velocity = cp < 0 ? -Math.sqrt(2 * MAX_ACCEL * -cp) : -Math.sqrt(2 * MAX_ACCEL * 0.001);
+                //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
+                distance = 0.5 * acceleration * cp * cp;
+            } else if (Math.abs(dRemaining) > Math.abs(ddDecel)) {
+                System.out.println("CRUISE");
+                telemetry.addLine("CRUISE");
+                acceleration = 0;
+                velocity = -Math.sqrt(2 * MAX_ACCEL * -dCruise);
+                distance = dAccel + MAX_VEL * (cp - dAccel);
+            } else {
+                System.out.println("DECEL");
+                telemetry.addLine("DECEL");
+                double dDecel = tp - cp;
+                acceleration = -MAX_ACCEL;
+                velocity = -Math.sqrt(2 * MAX_ACCEL * Math.abs(error));
+                distance = tp - 0.5 * acceleration * (dRemaining * dRemaining);
+            }
+        }
+        return velocity;
+    }
+
+    double PIDFController(double reference, double state, double dt) {
+
+        double error = reference - state;
+
+        integralSum += error * dt;
+
+        double derivative = (error - lastError) / dt;
+
+        double feedForward = reference * kF;
+
+        lastError = error;
+
+        return (error * kP) + (integralSum * kI) + (derivative * kD) + feedForward;
     }
 }

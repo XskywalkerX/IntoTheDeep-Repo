@@ -74,25 +74,25 @@ public class MProfile implements Runnable {
             System.out.println(velocity);
 
             if (cp != tp) {
-                velocity = rectFunction(1.0 / 3.0, 0.422);
+                velocity = rectFunction(1.0 / 3.0, 0.522);
             } else {
                 velocity = 0;
             }
             controller.setOutputBounds(0, MAX_VEL);
-            controller.setTargetAcceleration(acceleration);
+            //controller.setTargetAcceleration(acceleration);
             controller.setTargetVelocity(velocity);
             controller.setTargetPosition(tp);
 
-            motor.setVelocity(controller.update(cp, motor.getVelocity()));
+            motor.setVelocity(velocity);
         }
     }
 
 
     public double rectFunction(double accelPeriod, double decelPeriod) {
 
-        double dAccel = accelPeriod * tp;
-        double dCruise = tp - (dAccel + dAccel);
-        double ddDecel = decelPeriod * tp;
+        double dAccel = accelPeriod * Math.abs(tp - cp);
+        double dCruise = Math.abs(tp - (dAccel + dAccel));
+        double ddDecel = decelPeriod * Math.abs(tp - cp);
 
         double dRemaining = tp - cp;
 
@@ -139,6 +139,9 @@ public class MProfile implements Runnable {
         return velocity;
     }
 
+    public void setKp() {
+
+    }
 
     public double expFunction(double time) {
         return time * time;
