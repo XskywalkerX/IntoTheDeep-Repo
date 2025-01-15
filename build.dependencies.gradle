@@ -2,6 +2,7 @@ repositories {
     mavenCentral()
     google() // Needed for androidx
     maven { url = 'https://maven.brott.dev/' }
+    maven { url= 'https://maven.pedropathing.com/' }
     flatDir {
         dirs rootProject.file('libs')
     }
@@ -19,5 +20,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'org.apache.commons:commons-math3:3.6.1'
     implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
+    implementation 'com.pedropathing:pedro:1.0.5'
 }
 
