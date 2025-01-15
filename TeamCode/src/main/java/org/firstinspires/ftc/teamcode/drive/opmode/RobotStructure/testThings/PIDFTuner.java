@@ -25,8 +25,6 @@ public class PIDFTuner extends LinearOpMode {
     double integralSum = 0;
     double lastError = 0;
 
-    MProfile mp;
-
     List<Integer> lastPositions = new ArrayList<>();
 
     volatile public static DcMotorEx linear;
@@ -49,6 +47,9 @@ public class PIDFTuner extends LinearOpMode {
     volatile public double distance = 0;
     volatile public double error = 0;
 
+    volatile public static double THRESHOLD = 10.0;
+    boolean hasUpdatedLastPosition = false;
+
     Servo arm;
 
     @Override
@@ -67,7 +68,7 @@ public class PIDFTuner extends LinearOpMode {
         linear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         linear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        while(!isStarted()) {
+        while (!isStarted()) {
             telemetry.addData("TARGET VEL", velocity);
             telemetry.addData("CURRENT VEL", linear.getVelocity());
             telemetry.addData("CURRENT POSITION", linear.getCurrentPosition());
@@ -79,7 +80,7 @@ public class PIDFTuner extends LinearOpMode {
 
         lastPositions.add(linear.getCurrentPosition());
 
-        while(opModeIsActive()) {
+        while (opModeIsActive()) {
 
             error = tp - linear.getCurrentPosition();
 
@@ -88,6 +89,16 @@ public class PIDFTuner extends LinearOpMode {
             double targetVelocity = rectFunction(1.0 / 3.0, 1.0 / 3.0);
 
             linear.setVelocity(PIDFController(targetVelocity, linear.getVelocity(), time.seconds()));
+
+            if (Math.abs(error) <= THRESHOLD && !hasUpdatedLastPosition) {
+                lastPositions.add(linear.getCurrentPosition());
+                hasUpdatedLastPosition = true; // Prevent further updates for this movement
+                telemetry.addLine("Updated lastPositions");
+            }
+
+            if (Math.abs(error) > THRESHOLD) {
+                hasUpdatedLastPosition = false;
+            }
 
             telemetry.addData("TARGET VEL", velocity);
             telemetry.addData("CURRENT VEL", linear.getVelocity());
@@ -105,7 +116,7 @@ public class PIDFTuner extends LinearOpMode {
 
         double dAccel = accelPeriod * (d);
         double ddDecel = decelPeriod * (d);
-        double dCruise = (tp - (dAccel + ddDecel));
+        double dCruise = (Math.abs(d) - (Math.abs(dAccel) + Math.abs(ddDecel)));
 
         double dRemaining = tp - cp;
 
@@ -113,52 +124,46 @@ public class PIDFTuner extends LinearOpMode {
         telemetry.addData("dAccel", dAccel);
         telemetry.addData("dCruise", dCruise);
         telemetry.addData("ddDecel", ddDecel);
+        telemetry.addData("LAST POS", lastPositions.get(lastPositions.size() - 1));
         telemetry.update();
 
-        if (d > 0) {
-            if (dRemaining > (dAccel + dCruise)) {
-                System.out.println("ACCEL");
-                telemetry.addLine("ACCEL");
-                acceleration = MAX_ACCEL;
-                velocity = cp > 0 ? Math.sqrt(2 * MAX_ACCEL * cp) : Math.sqrt(2 * MAX_ACCEL * 0.001);
-                //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
-                distance = 0.5 * acceleration * cp * cp;
-            } else if (dRemaining > ddDecel) {
-                System.out.println("CRUISE");
-                telemetry.addLine("CRUISE");
-                acceleration = 0;
-                velocity = Math.sqrt(2 * MAX_ACCEL * dCruise);
-                distance = dAccel + MAX_VEL * (cp - dAccel);
-            } else {
-                System.out.println("DECEL");
-                telemetry.addLine("DECEL");
-                double dDecel = tp - cp;
-                acceleration = -MAX_ACCEL;
-                velocity = Math.sqrt(2 * MAX_ACCEL * error);
-                distance = tp - 0.5 * acceleration * (dRemaining * dRemaining);
+        if (Math.abs(dRemaining) > THRESHOLD) {
+            if (d > 0) {
+                if (dRemaining > (ddDecel + dCruise)) {
+                    System.out.println("ACCEL");
+                    telemetry.addLine("ACCEL");
+                    acceleration = MAX_ACCEL;
+                    velocity = cp != 0 ? Math.sqrt(2 * MAX_ACCEL * Math.abs(cp)) : Math.sqrt(2 * MAX_ACCEL * 0.01);
+                    //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
+                    distance = 0.5 * acceleration * cp * cp;
+                } else if (dRemaining > ddDecel) {
+                    System.out.println("CRUISE");
+                    telemetry.addLine("CRUISE");
+                    acceleration = 0;
+                    velocity = Math.sqrt(2 * MAX_ACCEL * dCruise);
+                    distance = dAccel + MAX_VEL * (cp - dAccel);
+                } else {
+                    System.out.println("DECEL");
+                    telemetry.addLine("DECEL");
+                    double dDecel = tp - cp;
+                    acceleration = -MAX_ACCEL;
+                    velocity = Math.sqrt(2 * MAX_ACCEL * Math.abs(error));
+                    distance = tp - 0.5 * acceleration * (dRemaining * dRemaining);
+                }
+            } else if (d < 0) {
+                if(Math.abs(dRemaining) > (Math.abs(ddDecel) + dCruise)) {
+                    telemetry.addLine("ACCEL");
+                    velocity = cp != 0 ? -Math.sqrt(2 * MAX_ACCEL * Math.abs(cp)) : -Math.sqrt(2 * MAX_ACCEL * 0.01);
+                } else if (Math.abs(dRemaining) > Math.abs(ddDecel)){
+                    telemetry.addLine("CRUISE");
+                    velocity = -Math.sqrt(2 * MAX_ACCEL * Math.abs(dCruise));
+                } else {
+                    telemetry.addLine("DECEL");
+                    velocity = -Math.sqrt(2 * MAX_ACCEL * Math.abs(error));
+                }
             }
-        } else if(d < 0) {
-            if (Math.abs(dRemaining) > Math.abs(dAccel + dCruise)) {
-                System.out.println("ACCEL");
-                telemetry.addLine("ACCEL");
-                acceleration = MAX_ACCEL;
-                velocity = cp < 0 ? -Math.sqrt(2 * MAX_ACCEL * -cp) : -Math.sqrt(2 * MAX_ACCEL * 0.001);
-                //velocity = Math.sqrt(2 * MAX_ACCEL * (cp + 1));
-                distance = 0.5 * acceleration * cp * cp;
-            } else if (Math.abs(dRemaining) > Math.abs(ddDecel)) {
-                System.out.println("CRUISE");
-                telemetry.addLine("CRUISE");
-                acceleration = 0;
-                velocity = -Math.sqrt(2 * MAX_ACCEL * -dCruise);
-                distance = dAccel + MAX_VEL * (cp - dAccel);
-            } else {
-                System.out.println("DECEL");
-                telemetry.addLine("DECEL");
-                double dDecel = tp - cp;
-                acceleration = -MAX_ACCEL;
-                velocity = -Math.sqrt(2 * MAX_ACCEL * Math.abs(error));
-                distance = tp - 0.5 * acceleration * (dRemaining * dRemaining);
-            }
+        } else {
+            velocity = 0.0;
         }
         return velocity;
     }
