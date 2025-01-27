@@ -14,8 +14,6 @@ import java.util.List;
 
 public class DeliverySystem {
 
-    LinearLevel level = LinearLevel.GROUND;
-
     Telemetry telemetry;
 
     volatile public static double kP = 0.9;
@@ -23,11 +21,9 @@ public class DeliverySystem {
     volatile public static double kD = 0.5;
     volatile public static double kF = 1.1;
 
-    int tp = 0;
-
     DcMotorEx linear;
 
-    Servo claw, armX, armY;
+    Servo claw, armX, armY, dBox;
 
     Controller controller;
 
@@ -37,6 +33,7 @@ public class DeliverySystem {
         claw = hwMap.get(Servo.class, "claw");
         armX = hwMap.get(Servo.class, "armX");
         armY = hwMap.get(Servo.class, "armY");
+        dBox = hwMap.get(Servo.class, "dBox");
 
         controller = new Controller(kP, kI, kD, kF, telemetry, linear);
 
@@ -45,6 +42,10 @@ public class DeliverySystem {
 
     public void moveLinear(ElapsedTime time) {
         controller.moveMotor(time);
+    }
+
+    public void moveBox(double tp) {
+        dBox.setPosition(tp);
     }
 
     public void openClaw() {
