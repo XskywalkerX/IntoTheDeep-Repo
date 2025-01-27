@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.PedroPathing.Robot.OpModes;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.pedropathing.follower.Follower;
@@ -16,6 +18,8 @@ import org.firstinspires.ftc.teamcode.drive.opmode.PedroPathing.constants.LConst
 
 @TeleOp
 public class TeleOpLoop extends LinearOpMode {
+
+    boolean blueSide = false;
 
     ElapsedTime time = new ElapsedTime();
 
@@ -38,18 +42,37 @@ public class TeleOpLoop extends LinearOpMode {
         intakeSystem = new IntakeSystem(hardwareMap, telemetry);
         follower = new Follower(hardwareMap);
 
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
+
         gamepad_1 = new GamepadEx(gamepad1);
         gamepad_2 = new GamepadEx(gamepad2);
 
+        while (!isStarted()) {
+            if(gamepad_2.wasJustPressed(GamepadKeys.Button.X)) {
+                blueSide = !blueSide;
+            }
+
+            telemetry.addLine("SIDE: " + (blueSide ? "BLUE" : "RED"));
+            telemetry.update();
+        }
+
         waitForStart();
         while(opModeIsActive()) {
-            intakeSystem.getExpansion().setPower(
-                    gamepad_2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) - gamepad_2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER));
+
+            intakeSystem.moveExpansion(time);
+            intakeSystem.catchSample(blueSide);
 
             intakeSystem.controlIntake();
 
             deliverySystem.getLinear().setTargetPosition(linearLevel.getPosition());
             deliverySystem.moveLinear(time);
+
+            if(gamepad_2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                intakeSystem.getExpansion().setTargetPosition(8000);
+            } else if (gamepad_2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+                intakeSystem.getExpansion().setTargetPosition(1);
+            }
 
             switch (linearLevel) {
                 case GROUND:

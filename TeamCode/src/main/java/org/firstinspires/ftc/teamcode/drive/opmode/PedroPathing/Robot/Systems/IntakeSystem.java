@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.PedroPathing.Robot.Systems;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -22,6 +23,8 @@ public class IntakeSystem {
 
     Servo armLeft, armRight, box;
 
+    ColorSensor sensor;
+
     Controller controller;
 
     public IntakeSystem(HardwareMap hwMap, Telemetry telemetry) {
@@ -31,9 +34,10 @@ public class IntakeSystem {
         armLeft = hwMap.get(Servo.class, "armLeft");
         armRight = hwMap.get(Servo.class, "armRight");
         box = hwMap.get(Servo.class, "box");
+        sensor = hwMap.get(ColorSensor.class, "boxSensor");
 
         expansion.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //controller = new Controller(kP, kI, kD, kF, telemetry, expansion);
+        controller = new Controller(kP, kI, kD, kF, telemetry, expansion);
     }
 
 
@@ -55,8 +59,54 @@ public class IntakeSystem {
         moveArm((double) expansion.getCurrentPosition() / MAX_POSITION);
     }
 
+    public void catchSample(boolean blueSide) {
+        if (expansion.getCurrentPosition() > 6000) {
+            if (sensor.alpha() > 300) {
+                runReaper();
+            } else {
+                if (blueSide) {
+                    if (sensor.blue() > sensor.red() && sensor.blue() > sensor.green()) {
+                        // Correct sample (blue)
+                        stopReaper();
+                    } else if (sensor.green() > sensor.red() && sensor.green() > sensor.blue()) {
+                        // Correct sample (yellow)
+                        stopReaper();
+                    } else {
+                        // Incorrect sample (red)
+                        reverseReaper();
+                    }
+                } else {
+                    if (sensor.red() > sensor.blue() && sensor.red() > sensor.green()) {
+                        // Correct sample (red)
+                        stopReaper();
+                    } else if (sensor.green() > sensor.red() && sensor.green() > sensor.blue()) {
+                        // Correct sample (yellow)
+                        stopReaper();
+                    } else {
+                        // Incorrect sample (blue)
+                        reverseReaper();
+                    }
+                }
+            }
+        } else {
+
+        }
+    }
+
     /////////////////////////////////////////////////////////////////////////
 
+
+    public void runReaper() {
+        reaper.setPower(1);
+    }
+
+    public void reverseReaper() {
+        reaper.setPower(-1);
+    }
+
+    public void stopReaper() {
+        reaper.setPower(0);
+    }
 
     //minor movements
     public void moveArm(double tp) {
