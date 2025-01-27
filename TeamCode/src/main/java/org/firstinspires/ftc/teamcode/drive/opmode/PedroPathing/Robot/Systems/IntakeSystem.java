@@ -2,17 +2,15 @@ package org.firstinspires.ftc.teamcode.drive.opmode.PedroPathing.Robot.Systems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class IntakeSystem {
+
+    public static double MAX_POSITION = 8000;
 
     volatile public static double kP = 0.9;
     volatile public static double kI = 0;
@@ -34,13 +32,27 @@ public class IntakeSystem {
         armRight = hwMap.get(Servo.class, "armRight");
         box = hwMap.get(Servo.class, "box");
 
-        controller = new Controller(kP, kI, kD, kF, telemetry, expansion);
+        expansion.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //controller = new Controller(kP, kI, kD, kF, telemetry, expansion);
     }
 
 
     //TeleOp Functions
     public void moveExpansion(ElapsedTime time) {
         controller.moveMotor(time);
+    }
+
+    public void controlIntake() {
+
+//        double error = tp - cp;
+//
+//        double target = error / tp;
+//
+//        moveArm(target);
+//        moveBox(target);
+
+        moveBox((double) expansion.getCurrentPosition() / MAX_POSITION);
+        moveArm((double) expansion.getCurrentPosition() / MAX_POSITION);
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -54,5 +66,9 @@ public class IntakeSystem {
 
     public void moveBox(double tp) {
         box.setPosition(tp);
+    }
+
+    public DcMotorEx getExpansion() {
+        return expansion;
     }
 }
