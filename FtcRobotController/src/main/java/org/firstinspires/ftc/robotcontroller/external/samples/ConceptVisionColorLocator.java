@@ -60,7 +60,6 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Disabled
 @TeleOp(name = "Concept: Vision Color-Locator", group = "Concept")
 public class ConceptVisionColorLocator extends LinearOpMode
 {
@@ -129,17 +128,19 @@ public class ConceptVisionColorLocator extends LinearOpMode
          */
         VisionPortal portal = new VisionPortal.Builder()
                 .addProcessor(colorLocator)
-                .setCameraResolution(new Size(320, 240))
+                .setCameraResolution(new Size(320 * 2, 240 * 2))
+                .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .build();
 
-        telemetry.setMsTransmissionInterval(50);   // Speed up telemetry updates, Just use for debugging.
+        telemetry.setMsTransmissionInterval(20);   // Speed up telemetry updates, Just use for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
         // WARNING:  To be able to view the stream preview on the Driver Station, this code runs in INIT mode.
         while (opModeIsActive() || opModeInInit())
         {
             telemetry.addData("preview on/off", "... Camera Stream\n");
+            telemetry.addData("fps", portal.getFps());
 
             // Read the current list
             List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
@@ -185,7 +186,7 @@ public class ConceptVisionColorLocator extends LinearOpMode
             }
 
             telemetry.update();
-            sleep(50);
+            sleep(20);
         }
     }
 }

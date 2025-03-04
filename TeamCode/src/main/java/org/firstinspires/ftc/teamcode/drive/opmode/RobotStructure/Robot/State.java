@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Robot;
+package org.firstinspires.ftc.teamcode.RobotStructure.Robot;
 
 public enum State {
     IDLE("IDLE"),

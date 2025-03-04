@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.LogSystem;
+package org.firstinspires.ftc.teamcode.RobotStructure.LogSystem;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.RR.SampleMecanumDrive;
 import org.json.JSONException;
 import org.json.JSONObject;
 

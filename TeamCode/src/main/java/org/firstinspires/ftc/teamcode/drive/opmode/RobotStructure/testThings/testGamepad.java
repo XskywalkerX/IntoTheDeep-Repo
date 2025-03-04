@@ -1,11 +1,13 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
+package org.firstinspires.ftc.teamcode.RobotStructure.testThings;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.GamepadControl;
+import org.firstinspires.ftc.teamcode.RobotStructure.GamepadControl;
 
 @TeleOp
+@Disabled
 public class testGamepad extends LinearOpMode {
 
     @Override

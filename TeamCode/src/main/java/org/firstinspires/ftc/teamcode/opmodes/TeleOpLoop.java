@@ -1,0 +1,120 @@
+package org.firstinspires.ftc.teamcode.opmodes;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.drive.Systems.Vision.SamplePipeline;
+import org.firstinspires.ftc.teamcode.enums.ClawStates;
+import org.firstinspires.ftc.teamcode.enums.DeliveryStates;
+import org.firstinspires.ftc.teamcode.enums.IntakeStates;
+import org.firstinspires.ftc.teamcode.systems.DeliveryClaw;
+import org.firstinspires.ftc.teamcode.systems.DeliverySystem;
+import org.firstinspires.ftc.teamcode.systems.GamepadBoladao;
+import org.firstinspires.ftc.teamcode.systems.IntakeClaw;
+import org.firstinspires.ftc.teamcode.systems.IntakeSystem;
+import org.openftc.easyopencv.OpenCvWebcam;
+
+@TeleOp(name = "BACK IN BLACK")
+public class TeleOpLoop extends LinearOpMode {
+
+    double x = 0;
+
+    double clawServoPosition = 0;
+
+    GamepadBoladao gamepadBoladao;
+
+    IntakeSystem intakeSystem;
+    DeliverySystem deliverySystem;
+
+    Robot robot;
+
+    SamplePipeline pip;
+    OpenCvWebcam webcam;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        robot = new Robot(hardwareMap);
+
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
+        dashboard.startCameraStream(webcam, 30);
+
+        gamepadBoladao = new GamepadBoladao(gamepad1);
+        intakeSystem = new IntakeSystem();
+        deliverySystem = new DeliverySystem();
+
+        robot.leftLinear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightLinear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftLinear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightLinear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        waitForStart();
+        while (opModeIsActive()) {
+            gamepadBoladao.readGamepad(gamepad1);
+
+
+            intakeSystem.updateClawAngle(clawServoPosition);
+
+            intakeSystem.update(robot, telemetry, gamepad2.right_stick_y, clawServoPosition);
+            deliverySystem.update(robot, telemetry, gamepad2.left_stick_y);
+
+
+
+            if (gamepadBoladao.ONEwasYPressed()) {
+                IntakeSystem.CS = IntakeStates.IDLE;
+            }
+            if (gamepadBoladao.ONEwasBPressed() && IntakeSystem.CS != IntakeStates.READING) {
+                IntakeSystem.CS = IntakeStates.READING;
+            } else if (gamepadBoladao.ONEwasBPressed() && IntakeSystem.CS == IntakeStates.READING) {
+                IntakeSystem.CS = IntakeStates.CATCH;
+            }
+
+            if (gamepadBoladao.TWOwasYPressed()) {
+                IntakeSystem.CS = IntakeStates.IDLE;
+                DeliverySystem.CS = DeliveryStates.TRANSFER;
+            }
+            if (gamepadBoladao.TWOwasAPressed()) {
+                DeliverySystem.CS = DeliveryStates.SPECIMEN_OUTTAKE_1;
+                IntakeSystem.CS = IntakeStates.IDLE;
+            }
+            if (gamepadBoladao.TWOwasBPressed()) {
+                DeliverySystem.CS = DeliveryStates.SPECIMEN_INTAKE;
+                IntakeSystem.CS = IntakeStates.IDLE;
+            }
+            if (gamepadBoladao.TWOwasXPressed()) {
+                DeliverySystem.CS = DeliveryStates.HIGH_BASKET;
+                IntakeSystem.CS = IntakeStates.IDLE;
+            }
+
+            if (gamepadBoladao.TWOwasLeftBumperPressed()) {
+                if (DeliveryClaw.CS == ClawStates.OPENED) {
+                    DeliveryClaw.CS = ClawStates.CLOSED;
+                } else {
+                    DeliveryClaw.CS = ClawStates.OPENED;
+                }
+            }
+            if (gamepadBoladao.ONEwasLeftBumperPressed() && ( IntakeSystem.CS == IntakeStates.DROP )) {
+                if (IntakeClaw.CS == ClawStates.OPENED) {
+                    IntakeClaw.CS = ClawStates.CLOSED;
+                } else {
+                    IntakeClaw.CS = ClawStates.OPENED;
+                }
+            }
+
+            telemetry.addData("Claw B Rotation ", clawServoPosition);
+            telemetry.addData("Claw B Position: ", robot.clawB.getPosition());
+            telemetry.addData("PRESSED GAMEPAD ONE", gamepadBoladao.ONEwasBPressed());
+            telemetry.addData("PRESSED GAMEPAD TWO", gamepadBoladao.TWOwasBPressed());
+            telemetry.addData("Horizontal Linear Current Position", robot.horizontalLinear.getCurrentPosition());
+            telemetry.addData("X", x);
+            telemetry.update();
+
+        }
+    }
+}

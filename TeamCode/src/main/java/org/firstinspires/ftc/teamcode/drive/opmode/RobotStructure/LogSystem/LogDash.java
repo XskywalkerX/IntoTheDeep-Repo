@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.LogSystem;
+package org.firstinspires.ftc.teamcode.RobotStructure.LogSystem;
 
 import fi.iki.elonen.NanoHTTPD;
 

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Robot;
+package org.firstinspires.ftc.teamcode.RobotStructure.Robot;
 
 import android.app.ActivityManager;
 
@@ -12,9 +12,9 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
-import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.LogSystem.Dash;
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.LogSystem.SocketServer;
+import org.firstinspires.ftc.teamcode.RR.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.RobotStructure.LogSystem.Dash;
+import org.firstinspires.ftc.teamcode.RobotStructure.LogSystem.SocketServer;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 import org.java_websocket.WebSocket;
 import org.json.JSONException;

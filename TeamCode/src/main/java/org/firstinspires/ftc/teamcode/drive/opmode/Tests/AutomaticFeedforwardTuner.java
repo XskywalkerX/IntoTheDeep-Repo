@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.Tests;
+package org.firstinspires.ftc.teamcode.Tests;
 
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.MAX_RPM;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.rpmToVelocity;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.MAX_RPM;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.RUN_USING_ENCODER;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.rpmToVelocity;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.RR.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.util.LoggingUtil;
 import org.firstinspires.ftc.teamcode.util.RegressionUtil;
 

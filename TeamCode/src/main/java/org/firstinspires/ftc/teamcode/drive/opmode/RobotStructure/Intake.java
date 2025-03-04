@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure;
+package org.firstinspires.ftc.teamcode.RobotStructure;
 
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.blueArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.redArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.yellowArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.blueArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.redArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.yellowArea;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.PIDController.PIDController;
+import org.firstinspires.ftc.teamcode.RobotStructure.PIDController.PIDController;
 
 public class Intake {
 

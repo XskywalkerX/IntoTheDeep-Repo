@@ -1,19 +1,21 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
+package org.firstinspires.ftc.teamcode.RobotStructure.testThings;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.MProfile;
+import org.firstinspires.ftc.teamcode.RobotStructure.MProfile;
 
 @Config
 @TeleOp
+@Disabled
 public class newMProfileTest extends LinearOpMode {
 
     volatile public static int tp = 25000;

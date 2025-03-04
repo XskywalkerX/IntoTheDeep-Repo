@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Gustavo;
+package org.firstinspires.ftc.teamcode.RobotStructure.Gustavo;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 

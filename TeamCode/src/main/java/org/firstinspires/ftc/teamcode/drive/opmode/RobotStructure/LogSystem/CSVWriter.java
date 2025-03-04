@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.LogSystem;
+package org.firstinspires.ftc.teamcode.RobotStructure.LogSystem;
 
 import android.os.Environment;
 import java.io.File;

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RR;
+package org.firstinspires.ftc.teamcode.RR;
 
 import androidx.annotation.NonNull;
 
@@ -46,11 +46,11 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     public static double WHEEL_RADIUS = 0.944882; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double PARALLEL_X = 2; // X is the up and down direction
-    public static double PARALLEL_Y = -6.729050223; // Y is the strafe direction
+    public static double PARALLEL_X = 0; // X is the up and down direction
+    public static double PARALLEL_Y = 7.87; // Y is the strafe direction
 
-    public static double PERPENDICULAR_X = 2.72440944882;
-    public static double PERPENDICULAR_Y = -1;
+    public static double PERPENDICULAR_X = 4.33;
+    public static double PERPENDICULAR_Y = -2.75;
 
     public static double X_MULTIPLIER = 0.932491482;
     public static double Y_MULTIPLIER = 1.020739502;
@@ -70,8 +70,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
         this.drive = drive;
 
-        parallelEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "backLeft"));
-        perpendicularEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "frontRight"));
+        parallelEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "frontLeft"));
+        perpendicularEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "backRight"));
 
         // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
         readData();

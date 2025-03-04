@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.TCS3472;
+package org.firstinspires.ftc.teamcode.RobotStructure.TCS3472;
 
 import android.annotation.SuppressLint;
 
@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
 import com.qualcomm.robotcore.util.TypeConversion;
+
+import java.util.Arrays;
 
 @I2cDeviceType
 @DeviceProperties(name = "TCS3472 Color Sensor", xmlTag = "TCS3472")
@@ -20,6 +22,8 @@ public class TCS3472 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
 
         this.setOptimalReadWindow();
         this.deviceClient.setI2cAddress(ADDRESS_I2C_DEFAULT);
+        System.out.println("BTS");
+        System.out.println(this.deviceClient.getReadWindow());
 
         super.registerArmingStateCallback(false);
         this.deviceClient.engage();
@@ -28,7 +32,20 @@ public class TCS3472 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
     @Override
     public boolean doInitialize() {
 
-        deviceClient.write8(0x00, 0x03);  // Enable both the RGBC and ALS sensors
+        if (this.deviceClient.getReadWindow() == null) {
+            setOptimalReadWindow();
+        }
+
+        this.deviceClient.write8(Register.ENABLE.bVal, 0x80 | 0x03);
+        try {
+            Thread.sleep(100);
+            System.out.println(this.deviceClient.read8(0x80 | Register.RDATAL.bVal));
+            System.out.println(this.deviceClient.read8(0x80 | Register.ENABLE.bVal));
+            System.out.println(this.deviceClient.read8(0x80 | Register.DEVICE_ID.bVal));
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         return true;
     }
@@ -44,7 +61,10 @@ public class TCS3472 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
     }
 
     public enum Register {
-
+        FIRST(0),
+        ENABLE(0x00),
+        ATIME(0x01),
+        WTIME(0x03),
         CONFIG(0x0D),
         DEVICE_ID(0x12),
         STATUS(0x13),
@@ -55,7 +75,8 @@ public class TCS3472 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
         GDATAL(0x18),
         GDATAH(0x19),
         BDATAL(0x1A),
-        BDATAH(0x1B);
+        BDATAH(0x1B),
+        LAST(BDATAH.bVal);
 
         public final int bVal;
 
@@ -64,11 +85,11 @@ public class TCS3472 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
         }
     }
 
-    protected void setOptimalReadWindow() {
+    public void setOptimalReadWindow() {
 
         I2cDeviceSynch.ReadWindow readWindow = new I2cDeviceSynch.ReadWindow(
-                Register.CONFIG.bVal,
-                13,
+                Register.ENABLE.bVal,
+                26,
                 I2cDeviceSynch.ReadMode.REPEAT);
         this.deviceClient.setReadWindow(readWindow);
     }
@@ -85,13 +106,13 @@ public class TCS3472 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
     //DEVICE COMMUNICATION
     public short getManufacturerIDRaw()
     {
-        return deviceClient.read8(Register.DEVICE_ID.bVal);
+        return this.deviceClient.read8(0x80 | Register.DEVICE_ID.bVal);
     }
 
     protected short read16BitRegister(Register lowReg, Register highReg) {
         // Read low and high bytes and combine into a 16-bit value
-        byte lowByte = deviceClient.read8(lowReg.bVal);
-        byte highByte = deviceClient.read8(highReg.bVal);
+        byte lowByte = this.deviceClient.read8(0x80 | lowReg.bVal);
+        byte highByte = this.deviceClient.read8(0x80 | highReg.bVal);
         return (short) ((highByte << 8) | (lowByte & 0xFF));
     }
 
@@ -112,6 +133,10 @@ public class TCS3472 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
     // Get Blue data
     public short getBlueData() {
         return read16BitRegister(Register.BDATAL, Register.BDATAH);
+    }
+
+    public short getEnable() {
+        return this.deviceClient.read8(0x80 | Register.ENABLE.bVal);
     }
 
     // Example telemetry output for testing

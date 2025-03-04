@@ -1,16 +1,18 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Gustavo;
+package org.firstinspires.ftc.teamcode.RobotStructure.Gustavo;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.PoseStorage.PoseStorage;
+import org.firstinspires.ftc.teamcode.RR.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.RobotStructure.PoseStorage.PoseStorage;
 
 @Config
 @Autonomous(name = "Gustavoautonomous")
+@Disabled
 public class Gustavo extends LinearOpMode {
     SampleMecanumDrive robot;
     //Servo servo;

@@ -1,13 +1,15 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
+package org.firstinspires.ftc.teamcode.RobotStructure.testThings;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp
+@Disabled
 public class findMaxVel extends LinearOpMode {
 
     DcMotorEx mprofile;

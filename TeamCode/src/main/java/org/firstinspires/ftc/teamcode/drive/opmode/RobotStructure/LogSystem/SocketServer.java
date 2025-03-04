@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.LogSystem;
+package org.firstinspires.ftc.teamcode.RobotStructure.LogSystem;
 
 import org.java_websocket.server.WebSocketServer;
 import org.java_websocket.WebSocket;

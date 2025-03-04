@@ -1,9 +1,9 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings.Camera;
+package org.firstinspires.ftc.teamcode.RobotStructure.testThings.Camera;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.RR.SampleMecanumDrive;
 
 public class Blovo extends LinearOpMode {
 

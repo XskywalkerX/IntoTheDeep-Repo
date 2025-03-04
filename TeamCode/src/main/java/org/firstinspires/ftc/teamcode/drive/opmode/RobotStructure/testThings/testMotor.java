@@ -1,13 +1,15 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
+package org.firstinspires.ftc.teamcode.RobotStructure.testThings;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.PIDController.PIDController;
+import org.firstinspires.ftc.teamcode.RobotStructure.PIDController.PIDController;
 
 @TeleOp
+@Disabled
 @Config
 public class testMotor extends LinearOpMode {
 

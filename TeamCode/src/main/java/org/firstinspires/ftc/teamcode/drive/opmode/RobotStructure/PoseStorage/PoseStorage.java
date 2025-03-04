@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.PoseStorage;
+package org.firstinspires.ftc.teamcode.RobotStructure.PoseStorage;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 

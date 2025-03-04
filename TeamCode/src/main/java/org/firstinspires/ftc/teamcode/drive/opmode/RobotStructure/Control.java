@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure;
+package org.firstinspires.ftc.teamcode.RobotStructure;
 
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.isOn;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.isOn;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;

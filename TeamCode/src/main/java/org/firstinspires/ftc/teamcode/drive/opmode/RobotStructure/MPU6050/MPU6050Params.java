@@ -1,7 +1,7 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.MPU6050;
+package org.firstinspires.ftc.teamcode.RobotStructure.MPU6050;
 
 
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.MPU6050.MPU6050.ADDRESS_I2C_DEFAULT;
+import static org.firstinspires.ftc.teamcode.RobotStructure.MPU6050.MPU6050.ADDRESS_I2C_DEFAULT;
 
 import androidx.annotation.NonNull;
 

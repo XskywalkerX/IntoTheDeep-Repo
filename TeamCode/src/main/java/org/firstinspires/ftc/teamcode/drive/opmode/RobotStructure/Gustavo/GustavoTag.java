@@ -1,15 +1,16 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Gustavo;
+package org.firstinspires.ftc.teamcode.RobotStructure.Gustavo;
 
 import android.media.MediaRecorder;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Webcam;
+import org.firstinspires.ftc.teamcode.RobotStructure.Webcam;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 
 @TeleOp
+@Disabled
 public class GustavoTag extends LinearOpMode {
     AprilTagProcessor TagProcessor;
     VisionPortal visaoportal;

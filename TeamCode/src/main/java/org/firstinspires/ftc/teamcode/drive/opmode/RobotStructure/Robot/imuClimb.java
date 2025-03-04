@@ -1,12 +1,14 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Robot;
+package org.firstinspires.ftc.teamcode.RobotStructure.Robot;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
+@Disabled
 public class imuClimb extends LinearOpMode {
 
     BNO055IMU imu;

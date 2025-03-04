@@ -1,9 +1,9 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Gustavo;
+package org.firstinspires.ftc.teamcode.RobotStructure.Gustavo;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.RR.SampleMecanumDrive;
 
 public class Gustavolinear extends LinearOpMode {
 

@@ -1,13 +1,15 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Robot;
+package org.firstinspires.ftc.teamcode.RobotStructure.Robot;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "Main OpMode", group = "LogSystem")
+@Disabled
 public class main extends LinearOpMode {
 
     Robot robot;

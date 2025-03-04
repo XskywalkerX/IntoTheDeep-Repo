@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings.Camera;
+package org.firstinspires.ftc.teamcode.RobotStructure.testThings.Camera;
 
 public enum Location {
 

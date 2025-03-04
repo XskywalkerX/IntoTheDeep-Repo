@@ -1,33 +1,35 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings.Camera;
+package org.firstinspires.ftc.teamcode.RobotStructure.testThings.Camera;
 
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.blueArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.blueSampleArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.cX;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.cY;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.getDistance;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.isOn;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.redArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.redSampleArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.side;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.width;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.yellowArea;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline.yellowSampleArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.blueArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.blueSampleArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.cX;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.cY;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.getDistance;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.isOn;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.redArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.redSampleArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.side;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.width;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.yellowArea;
+import static org.firstinspires.ftc.teamcode.RobotStructure.Pipeline.yellowSampleArea;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.RR.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Pipeline;
-import org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.Webcam;
+import org.firstinspires.ftc.teamcode.RR.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.RobotStructure.Pipeline;
+import org.firstinspires.ftc.teamcode.RobotStructure.Webcam;
 import org.firstinspires.ftc.teamcode.models.Rectangle;
 
 @Config
 @TeleOp(name = "blablabla")
+@Disabled
 public class camera extends LinearOpMode {
 
     String s = "INSIDE";

@@ -1,6 +1,7 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.LogSystem;
+package org.firstinspires.ftc.teamcode.RobotStructure.LogSystem;
 
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
 import java.io.IOException;
 
 @TeleOp
+@Disabled
 public class Dashboard extends LinearOpMode {
 
     private LogDash logDash;

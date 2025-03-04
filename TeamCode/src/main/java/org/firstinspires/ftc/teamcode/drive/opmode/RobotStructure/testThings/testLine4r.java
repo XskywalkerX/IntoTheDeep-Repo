@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings;
+package org.firstinspires.ftc.teamcode.RobotStructure.testThings;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp
+@Disabled
 public class testLine4r extends LinearOpMode {
 
     DcMotorEx linear;
@@ -16,6 +18,8 @@ public class testLine4r extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()) {
             linear.setPower(gamepad1.right_trigger - gamepad1.left_trigger);
+            telemetry.addData("POS", linear.getCurrentPosition());
+            telemetry.update();
         }
     }
 }

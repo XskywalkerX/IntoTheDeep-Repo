@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.MPU6050;
+package org.firstinspires.ftc.teamcode.RobotStructure.MPU6050;
 
 
 import static java.lang.Math.PI;

@@ -1,17 +1,17 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.RR;
+package org.firstinspires.ftc.teamcode.RR;
 
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.MAX_ACCEL;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.MAX_ANG_ACCEL;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.MAX_ANG_VEL;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.MAX_VEL;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.MOTOR_VELO_PID;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.TRACK_WIDTH;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.encoderTicksToInches;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.kA;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.kStatic;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RR.DriveConstants.kV;
-import static org.firstinspires.ftc.teamcode.drive.opmode.RobotStructure.testThings.Camera.camera.isSearching;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.MAX_ACCEL;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.MAX_ANG_ACCEL;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.MAX_ANG_VEL;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.MAX_VEL;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.MOTOR_VELO_PID;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.RUN_USING_ENCODER;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.TRACK_WIDTH;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.encoderTicksToInches;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.kA;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.kStatic;
+import static org.firstinspires.ftc.teamcode.RR.DriveConstants.kV;
+import static org.firstinspires.ftc.teamcode.RobotStructure.testThings.Camera.camera.isSearching;
 
 import androidx.annotation.NonNull;
 
@@ -114,10 +114,10 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         // TODO: adjust the names of the following hardware devices to match your configuration
 
-        leftFront = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        leftRear = hardwareMap.get(DcMotorEx.class, "backLeft");
-        rightRear = hardwareMap.get(DcMotorEx.class, "backRight");
-        rightFront = hardwareMap.get(DcMotorEx.class, "frontRight");
+        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
+        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
@@ -383,13 +383,13 @@ public class SampleMecanumDrive extends MecanumDrive {
 
                 setMotorDirection(
                         getFrontLeft(),
-                        config.optString("frontLeftDir", "FORWARD"));
+                        config.optString("leftFront", "FORWARD"));
                 setMotorDirection(getFrontRight(),
-                        config.optString("frontRightDir", "FORWARD"));
+                        config.optString("rightFront", "FORWARD"));
                 setMotorDirection(getBackLeft(),
-                        config.optString("backLeftDir", "FORWARD"));
+                        config.optString("leftRear", "FORWARD"));
                 setMotorDirection(getBackRight(),
-                        config.optString("backRightDir", "FORWARD"));
+                        config.optString("rightRear", "FORWARD"));
 
                 // Example: Print keys from the JSON to telemetry
                 Iterator<String> keys = config.keys();
