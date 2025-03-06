@@ -6,5 +6,6 @@ public enum VerticalLinearStates {
     TRANSFER,
     HIGH_BASKET,
     LOW_BASKET,
-    CLIP_SPECIMEN
+    CLIP_SPECIMEN,
+    PREVENT_STATE
 }
