@@ -20,12 +20,13 @@ public class debugMotors extends LinearOpMode {
         robot.leftLinear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightLinear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        robot.horizontalLinear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.horizontalLinear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         while (opModeIsActive()) {
-            telemetry.addData("Left Linear Position", robot.leftLinear.getCurrentPosition());
-            telemetry.addData("Right Linear Position", robot.rightLinear.getCurrentPosition());
+            telemetry.addData("horizontalLinear Position", robot.horizontalLinear.getCurrentPosition());
             telemetry.update();
-            robot.leftLinear.setPower(gamepad1.left_stick_y * 0.75);
-            robot.rightLinear.setPower(gamepad1.left_stick_y * 0.75);
+            robot.horizontalLinear.setPower(gamepad1.left_stick_y * 0.75);
         }
     }
 }

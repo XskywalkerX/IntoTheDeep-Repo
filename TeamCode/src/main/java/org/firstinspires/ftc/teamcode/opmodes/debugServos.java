@@ -31,14 +31,10 @@ public class debugServos extends LinearOpMode {
 
         Robot robot = new Robot(hardwareMap);
 
-        robot.intakeY.setPosition(Globals.INTAKE_Y_READ);
-        robot.intakeX.setPosition(Globals.INTAKE_X_READ);
-
         waitForStart();
         timer.reset();
         while (opModeIsActive()) {
-
-            robot.clawB.setPosition(clawB);
+            robot.deliveryX.setPosition(deliveryX);
         }
     }
 }
