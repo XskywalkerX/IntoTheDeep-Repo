@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.enums.HorizontalLinearStates;
 public class IntakeClaw {
     public static ClawStates CS = ClawStates.INITIALIZE, PS = ClawStates.INITIALIZE;
 
-    public static double closed = .75;
-    public static double opened = 0;
+    public static double closed = .4;
+    public static double opened = 0.05;
 
     public IntakeClaw() {
         CS = ClawStates.INITIALIZE;
