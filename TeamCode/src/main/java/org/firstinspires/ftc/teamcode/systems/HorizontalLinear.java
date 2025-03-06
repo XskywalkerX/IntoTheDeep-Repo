@@ -49,8 +49,10 @@ public class HorizontalLinear {
 
         switch (CS) {
             case INITIALIZE:
+                CS = HorizontalLinearStates.IDLE;
+                break;
             case RETRACTED:
-                robot.horizontalLinear.setPower(-0.15);
+                robot.horizontalLinear.setPower(0);
                 break;
             case EXTENDED:
                 break;
@@ -58,28 +60,30 @@ public class HorizontalLinear {
                 if (PS != HorizontalLinearStates.EXTENDING) {
                     robot.horizontalLinear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     robot.horizontalLinear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                }
-
-                if (robot.horizontalLinear.getCurrentPosition() <= 250) {
-                    robot.horizontalLinear.setPower(0.55);
-                } else {
-                    robot.horizontalLinear.setPower(0.35);
-                }
-                if (robot.horizontalLinear.getCurrentPosition() >= 320) {
-                    CS = HorizontalLinearStates.EXTENDED;
-                }
-                break;
-            case RETRACTING:
-                if (PS != HorizontalLinearStates.RETRACTING) {
                     timer.reset();
                 }
-                if (timer.seconds() >= 2) {
+                if(timer.seconds() <= 2) {
+                    robot.horizontalLinear.setPower(0.35);
+                } else {
+                    CS = HorizontalLinearStates.EXTENDED;
+                }
+
+                break;
+            case RETRACTING:
+                if(PS != HorizontalLinearStates.RETRACTING) {
+                    timer.reset();
+                }
+
+                if (timer.seconds() <= 2) {
+                    robot.horizontalLinear.setPower(-0.35);
+                } else {
                     CS = HorizontalLinearStates.RETRACTED;
                 }
-                robot.horizontalLinear.setPower(-0.55);
                 break;
             case IDLE:
-                //robot.horizontalLinear.setTargetPosition(robot.horizontalLinear.getCurrentPosition());
+                if (PS != HorizontalLinearStates.IDLE) {
+                    robot.horizontalLinear.setPower(0);
+                }
                 break;
         }
         PS = CS;
