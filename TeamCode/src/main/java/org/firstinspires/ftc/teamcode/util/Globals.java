@@ -13,21 +13,21 @@ public class Globals {
     public static double INTAKE_X_SAFE_MIN = 0.25;
     public static double INTAKE_X_SAFE_MAX = 0.51;
 
-    public static double CAMERA_Y_CATCH_SETPOINT = 280;
-    public static double CAMERA_X_CATCH_SETPOINT = 320;
+    public static double CAMERA_Y_CATCH_SETPOINT = 235;
+    public static double CAMERA_X_CATCH_SETPOINT = 195;
 
     public static double INTAKE_CLAW_IDLE = 0.4;
 
-    public static double INTAKE_Y_CATCH = 0.4;
+    public static double INTAKE_Y_CATCH = 1;
     public static double INTAKE_X_CATCH = 0.7;
 
-    public static double INTAKE_X_TRANSFER = 0.65;
-    public static double INTAKE_Y_TRANSFER = 0.03;
+    public static double INTAKE_X_TRANSFER = 0.63;
+    public static double INTAKE_Y_TRANSFER = 0;
 
     public static double INTAKE_X_DROP = 0.4;
     public static double INTAKE_Y_DROP = 0.5;
 
-    public static double INTAKE_Y_READ = 0.4;
+    public static double INTAKE_Y_READ = 0.3;
     public static double INTAKE_X_READ = 0.35;
 
     public static int MAX_EXPANDED_INTAKE = 120;
