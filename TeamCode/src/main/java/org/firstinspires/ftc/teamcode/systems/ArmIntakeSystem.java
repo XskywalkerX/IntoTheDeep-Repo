@@ -7,6 +7,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.enums.ArmIntakeStates;
 import org.firstinspires.ftc.teamcode.enums.ClawStates;
+import org.firstinspires.ftc.teamcode.enums.HorizontalLinearStates;
+import org.firstinspires.ftc.teamcode.enums.IntakeStates;
 import org.firstinspires.ftc.teamcode.util.Globals;
 
 @Config
@@ -19,9 +21,13 @@ public class ArmIntakeSystem {
 
     double clawBAngle = 0;
 
+    HorizontalLinear horizontalLinear;
+
     public ArmIntakeSystem() {
         CS = ArmIntakeStates.INITIALIZE;
         PS = ArmIntakeStates.INITIALIZE;
+
+        horizontalLinear = new HorizontalLinear();
     }
 
     public void updateClawAngle(double angle) {
@@ -33,12 +39,22 @@ public class ArmIntakeSystem {
     }
 
     public void update(Robot robot, Telemetry telemetry) {
-        robot.clawB.setPosition(clawBAngle);
         switch (CS) {
             case INITIALIZE:
             case TRANSFER:
-                robot.intakeX.setPosition(Globals.INTAKE_X_TRANSFER);
+                HorizontalLinear.CS = HorizontalLinearStates.IDLE;
+                if (PS != CS) {
+                    time.reset();
+                }
+                robot.clawB.setPosition(0);
                 robot.intakeY.setPosition(Globals.INTAKE_Y_TRANSFER);
+                HorizontalLinear.CS = HorizontalLinearStates.EXTENDING;
+                if (time.seconds() >= 1.8) {
+                    robot.intakeX.setPosition(Globals.INTAKE_X_TRANSFER);
+                    if (time.seconds() >= 2.2) {
+                        HorizontalLinear.CS = HorizontalLinearStates.RETRACTING;
+                    }
+                }
                 break;
             case DROP:
 
@@ -56,29 +72,32 @@ public class ArmIntakeSystem {
                 }
                 break;
             case READ:
+                HorizontalLinear.CS = HorizontalLinearStates.IDLE;
                 robot.intakeY.setPosition(Globals.INTAKE_Y_READ);
-                robot.intakeX.setPosition(Globals.INTAKE_X_READ);
+                if (PS != CS) {
+                    robot.intakeX.setPosition(Globals.INTAKE_X_READ);
+                }
                 break;
             case CATCH:
-
                 if (PS != ArmIntakeStates.CATCH) {
                     time.reset();
                 }
-
-                robot.clawB.setPosition(clawBAngle);
-
                 robot.intakeY.setPosition(Globals.INTAKE_Y_CATCH);
-                robot.intakeX.setPosition(Globals.INTAKE_X_CATCH);
 
-                if (time.seconds() >= 1) {
+                if (time.seconds() >= 0.65) {
                     IntakeClaw.CS = ClawStates.CLOSED;
-                    if (time.seconds() >= 1.5) {
+                    if (time.seconds() >= .85) {
+                        telemetry.addLine("TROCA O ESTAAADO");
                         CS = ArmIntakeStates.TRANSFER;
-                        time.reset();
+                        IntakeSystem.CS = IntakeStates.IDLE;
                     }
                 }
                 break;
         }
+        telemetry.addData("ArmIntakeSystem timer ", time.seconds());
+
+        horizontalLinear.update(robot, 0);
+
         PS = CS;
     }
 
