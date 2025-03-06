@@ -16,7 +16,10 @@ import org.firstinspires.ftc.teamcode.systems.DeliverySystem;
 import org.firstinspires.ftc.teamcode.systems.GamepadBoladao;
 import org.firstinspires.ftc.teamcode.systems.IntakeClaw;
 import org.firstinspires.ftc.teamcode.systems.IntakeSystem;
+import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.openftc.easyopencv.OpenCvWebcam;
+
+import java.util.List;
 
 @TeleOp(name = "BACK IN BLACK")
 public class TeleOpLoop extends LinearOpMode {
@@ -56,14 +59,12 @@ public class TeleOpLoop extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
+            // Read the current list
+            List<ColorBlobLocatorProcessor.Blob> blobs = robot.colorLocator.getBlobs();
+            ColorBlobLocatorProcessor.Util.filterByArea(1500, 500000, blobs);  // filter out very small blobs.
             gamepadBoladao.readGamepad(gamepad1);
-
-
-            intakeSystem.updateClawAngle(clawServoPosition);
-
-            intakeSystem.update(robot, telemetry, gamepad2.right_stick_y, clawServoPosition);
+            intakeSystem.update(robot, telemetry, gamepad2.right_stick_y, clawServoPosition, blobs);
             deliverySystem.update(robot, telemetry, gamepad2.left_stick_y);
-
 
 
             if (gamepadBoladao.ONEwasYPressed()) {
@@ -74,12 +75,15 @@ public class TeleOpLoop extends LinearOpMode {
             } else if (gamepadBoladao.ONEwasBPressed() && IntakeSystem.CS == IntakeStates.READING) {
                 IntakeSystem.CS = IntakeStates.CATCH;
             }
+            if (gamepadBoladao.ONEwasAPressed()) {
+                IntakeSystem.CS = IntakeStates.DROP;
+            }
 
             if (gamepadBoladao.TWOwasYPressed()) {
                 IntakeSystem.CS = IntakeStates.IDLE;
                 DeliverySystem.CS = DeliveryStates.TRANSFER;
             }
-            if (gamepadBoladao.TWOwasAPressed()) {
+            if (gamepadBoladao.TWOwasAPressed() && DeliverySystem.CS == DeliveryStates.TRANSFER) {
                 DeliverySystem.CS = DeliveryStates.SPECIMEN_OUTTAKE_1;
                 IntakeSystem.CS = IntakeStates.IDLE;
             }
@@ -87,7 +91,7 @@ public class TeleOpLoop extends LinearOpMode {
                 DeliverySystem.CS = DeliveryStates.SPECIMEN_INTAKE;
                 IntakeSystem.CS = IntakeStates.IDLE;
             }
-            if (gamepadBoladao.TWOwasXPressed()) {
+            if (gamepadBoladao.TWOwasXPressed() && DeliverySystem.CS == DeliveryStates.TRANSFER) {
                 DeliverySystem.CS = DeliveryStates.HIGH_BASKET;
                 IntakeSystem.CS = IntakeStates.IDLE;
             }
