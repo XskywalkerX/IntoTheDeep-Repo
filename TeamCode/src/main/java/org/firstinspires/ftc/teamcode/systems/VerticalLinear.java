@@ -10,12 +10,14 @@ import org.firstinspires.ftc.teamcode.enums.VerticalLinearStates;
 public class VerticalLinear {
 
     public static double Kp_retract = 0.00035;
-    public static double Ki_retract = 0.005;
+    public static double Ki_retract = 0;
     public static double Kd_retract = 0.0;
 
     public static double Kp_extend = 0.007;
-    public static double Ki_extend = 0.15;
+    public static double Ki_extend = 0;
     public static double Kd_extend = 0.000;
+
+    public static int linearTransferPosition = 500;
 
     public static VerticalLinearStates CS = VerticalLinearStates.INITIALIZE, PS = VerticalLinearStates.INITIALIZE;
 
@@ -50,12 +52,12 @@ public class VerticalLinear {
                 robot.rightLinear.setTargetPosition(0);
                 break;
             case CLIP_SPECIMEN:
-                robot.leftLinear.setTargetPosition(0);
-                robot.rightLinear.setTargetPosition(0);
+                robot.leftLinear.setTargetPosition(750);
+                robot.rightLinear.setTargetPosition(750);
                 break;
             case TRANSFER:
-                robot.leftLinear.setTargetPosition(204);
-                robot.rightLinear.setTargetPosition(204);
+                robot.leftLinear.setTargetPosition(linearTransferPosition);
+                robot.rightLinear.setTargetPosition(linearTransferPosition);
                 break;
             case HIGH_BASKET:
                 robot.leftLinear.setTargetPosition(2190);
@@ -65,6 +67,10 @@ public class VerticalLinear {
                 robot.leftLinear.setTargetPosition(1905);
                 robot.rightLinear.setTargetPosition(1905);
                 break;
+            case PREVENT_STATE:
+                robot.leftLinear.setTargetPosition(linearTransferPosition + 350);
+                robot.rightLinear.setTargetPosition(linearTransferPosition + 350);
+
         }
 
         if (robot.leftLinear.getCurrentPosition() <= robot.leftLinear.getTargetPosition()) {
