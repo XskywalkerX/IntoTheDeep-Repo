@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.systems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -18,8 +19,10 @@ import org.opencv.imgproc.Moments;
 import java.util.ArrayList;
 import java.util.List;
 
+@Config
 public class IntakeSystem {
 
+    boolean sampleAligned = false;
     public static double MULTIPLIER = 1;
 
     public static double k = 0.2;
@@ -30,6 +33,7 @@ public class IntakeSystem {
     ArmIntakeSystem armIntakeSystem;
     VerticalLinear verticalLinear;
 
+    ElapsedTime alignTime = new ElapsedTime();
     ElapsedTime time = new ElapsedTime();
     PIDController intakeXPID;
     PIDController linearPID;
@@ -91,6 +95,7 @@ public class IntakeSystem {
                 MULTIPLIER *= 1 + (manualPower * k);
 
                 if (PS != CS) {
+                    alignTime.reset();
                     time.reset();
                     IntakeClaw.CS = ClawStates.OPENED;
                     ArmIntakeSystem.CS = ArmIntakeStates.READ;
@@ -142,18 +147,25 @@ public class IntakeSystem {
                         if ((Math.abs(Globals.CAMERA_X_CATCH_SETPOINT - blobs.get(0).getBoxFit().center.x) < 15) && (Math.abs(Globals.CAMERA_Y_CATCH_SETPOINT - blobs.get(0).getBoxFit().center.y) < 55)) {
 
                             robot.clawB.setPosition((theta2 + 90) / 180);
+                            sampleAligned = true;
+                        } else {
+                            alignTime.reset();
+                        }
 
+                        if(alignTime.seconds() >= 0.819 && sampleAligned) {
+                            alignTime.reset();
                             CS = IntakeStates.CATCH;
                             ArmIntakeSystem.CS = ArmIntakeStates.CATCH;
+                            sampleAligned = false;
                         }
 
                     } else {
                         robot.intakeX.setPosition(Globals.INTAKE_X_READ);
                         robot.intakeY.setPosition(Globals.INTAKE_Y_READ);
 
-                        if(HorizontalLinear.CS == HorizontalLinearStates.RETRACTED) {
+                        if (HorizontalLinear.CS == HorizontalLinearStates.RETRACTED) {
                             HorizontalLinear.CS = HorizontalLinearStates.EXTENDING;
-                        } else if(HorizontalLinear.CS == HorizontalLinearStates.EXTENDED){
+                        } else if (HorizontalLinear.CS == HorizontalLinearStates.EXTENDED) {
                             HorizontalLinear.CS = HorizontalLinearStates.RETRACTING;
                         }
                     }
@@ -201,18 +213,24 @@ public class IntakeSystem {
                         if ((Math.abs(Globals.CAMERA_X_CATCH_SETPOINT - blobs.get(0).getBoxFit().center.x) < 15) && (Math.abs(Globals.CAMERA_Y_CATCH_SETPOINT - blobs.get(0).getBoxFit().center.y) < 55)) {
 
                             robot.clawB.setPosition((theta2 + 90) / 180);
-
+                            sampleAligned = true;
+                        } else {
+                            alignTime.reset();
+                        }
+                        if (sampleAligned && alignTime.seconds() >= 0.819) {
+                            alignTime.reset();
                             CS = IntakeStates.CATCH;
                             ArmIntakeSystem.CS = ArmIntakeStates.CATCH;
+                            sampleAligned = false;
                         }
 
                     } else {
                         robot.intakeX.setPosition(Globals.INTAKE_X_READ);
                         robot.intakeY.setPosition(Globals.INTAKE_Y_READ);
 
-                        if(HorizontalLinear.CS == HorizontalLinearStates.RETRACTED) {
+                        if (HorizontalLinear.CS == HorizontalLinearStates.RETRACTED) {
                             HorizontalLinear.CS = HorizontalLinearStates.EXTENDING;
-                        } else if(HorizontalLinear.CS == HorizontalLinearStates.EXTENDED) {
+                        } else if (HorizontalLinear.CS == HorizontalLinearStates.EXTENDED) {
                             HorizontalLinear.CS = HorizontalLinearStates.RETRACTING;
                         }
                     }
