@@ -38,7 +38,7 @@ public class HorizontalLinear {
         activePID = linearPIDExtend;
     }
 
-    public void update(Robot robot, double manualPower) {
+    public void update(Robot robot) {
         linearPIDExtend.setP(Kp_extend);
         linearPIDExtend.setI(Kp_extend);
         linearPIDExtend.setD(Kd_extend);
