@@ -25,6 +25,7 @@ public class Robot {
     public WebcamName webcam;
 
     public ColorBlobLocatorProcessor colorLocator;
+    public ColorBlobLocatorProcessor yellowLocator;
     public VisionPortal portal;
 
 
@@ -66,8 +67,16 @@ public class Robot {
                 .setBlurSize(5)                               // Smooth the transitions between different colors in image
                 .build();
 
+        yellowLocator = new ColorBlobLocatorProcessor.Builder()
+                .setTargetColorRange(ColorRange.YELLOW)         // use a predefined color match
+                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)    // exclude blobs inside blobs
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.9, 0.9, 0.9, -0.9))  // entire frame
+                .setDrawContours(true)                        // Show contours on the Stream Preview
+                .setBlurSize(5)                               // Smooth the transitions between different colors in image
+                .build();
+
         portal = new VisionPortal.Builder()
-                .addProcessor(colorLocator)
+                .addProcessors(colorLocator, yellowLocator)
                 .setCameraResolution(new Size(320 * 2, 240 * 2))
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .setCamera(webcam)
