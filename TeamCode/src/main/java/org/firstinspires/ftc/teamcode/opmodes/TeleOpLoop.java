@@ -77,9 +77,8 @@ public class TeleOpLoop extends LinearOpMode {
             if (gamepadBoladao.ONEwasBPressed() && IntakeSystem.CS != IntakeStates.READING) {
                 intakeSystem.setBlobs(blobs);
                 IntakeSystem.CS = IntakeStates.READING;
-            } else if (gamepadBoladao.ONEwasBPressed() && IntakeSystem.CS == IntakeStates.READING) {
-                IntakeSystem.CS = IntakeStates.CATCH;
             }
+
             if(gamepadBoladao.ONEwasDpadUpPressed() && IntakeSystem.CS != IntakeStates.READING) {
                 intakeSystem.setBlobs(yellowBlobs);
                 IntakeSystem.CS = IntakeStates.READING;
