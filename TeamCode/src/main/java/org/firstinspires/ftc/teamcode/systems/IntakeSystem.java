@@ -50,12 +50,7 @@ public class IntakeSystem {
     public static double theta = 0;
     public static double theta2 = 0;
 
-    List<ColorBlobLocatorProcessor.Blob> blobs;
-
-    public IntakeSystem(List<ColorBlobLocatorProcessor.Blob> blobs) {
-
-        this.blobs = blobs;
-
+    public IntakeSystem() {
         CS = IntakeStates.INITIALIZE;
         PS = IntakeStates.INITIALIZE;
 
@@ -68,11 +63,7 @@ public class IntakeSystem {
         linearPID = new PIDController(Kp_linear, Ki_linear, Kd_linear);
     }
 
-    public void setBlobs(List<ColorBlobLocatorProcessor.Blob> blobs) {
-        this.blobs = blobs;
-    }
-
-    public void update(Robot robot, double manualPower) {
+    public void update(Robot robot, double manualPower, List<ColorBlobLocatorProcessor.Blob> blobs) {
         switch (CS) {
             case INITIALIZE:
             case IDLE:
@@ -245,7 +236,6 @@ public class IntakeSystem {
                     }
                 }
                 break;
-
             case CATCH:
                 if (PS != CS) {
                     ArmIntakeSystem.CS = ArmIntakeStates.CATCH;

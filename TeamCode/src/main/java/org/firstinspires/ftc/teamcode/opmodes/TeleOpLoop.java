@@ -45,11 +45,10 @@ public class TeleOpLoop extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
         dashboard.startCameraStream(webcam, 30);
 
-        List<ColorBlobLocatorProcessor.Blob> blobs = robot.colorLocator.getBlobs();
-        List<ColorBlobLocatorProcessor.Blob> yellowBlobs;
+        List<ColorBlobLocatorProcessor.Blob> currentBlob = robot.colorLocator.getBlobs();
 
         gamepadBoladao = new GamepadBoladao(gamepad1);
-        intakeSystem = new IntakeSystem(blobs);
+        intakeSystem = new IntakeSystem();
         deliverySystem = new DeliverySystem();
 
         robot.leftLinear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -62,12 +61,12 @@ public class TeleOpLoop extends LinearOpMode {
         while (opModeIsActive()) {
             double horizontalMultiplier = gamepad1.right_trigger - gamepad1.left_trigger;
             // Read the current list
-            blobs = robot.colorLocator.getBlobs();
-            yellowBlobs = robot.yellowLocator.getBlobs();
+            List<ColorBlobLocatorProcessor.Blob> blobs = robot.colorLocator.getBlobs();
+            List<ColorBlobLocatorProcessor.Blob> yellowBlobs = robot.yellowLocator.getBlobs();
             ColorBlobLocatorProcessor.Util.filterByArea(1500, 500000, yellowBlobs);
             ColorBlobLocatorProcessor.Util.filterByArea(1500, 500000, blobs);  // filter out very small blobs.
             gamepadBoladao.readGamepad(gamepad1);
-            intakeSystem.update(robot, horizontalMultiplier);
+            intakeSystem.update(robot, horizontalMultiplier, currentBlob);
             deliverySystem.update(robot);
 
 
@@ -75,12 +74,11 @@ public class TeleOpLoop extends LinearOpMode {
                 IntakeSystem.CS = IntakeStates.IDLE;
             }
             if (gamepadBoladao.ONEwasBPressed() && IntakeSystem.CS != IntakeStates.READING) {
-                intakeSystem.setBlobs(blobs);
+                currentBlob = blobs;
                 IntakeSystem.CS = IntakeStates.READING;
             }
-
             if(gamepadBoladao.ONEwasDpadUpPressed() && IntakeSystem.CS != IntakeStates.READING) {
-                intakeSystem.setBlobs(yellowBlobs);
+                currentBlob = yellowBlobs;
                 IntakeSystem.CS = IntakeStates.READING;
             }
 
