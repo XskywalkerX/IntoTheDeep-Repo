@@ -11,11 +11,14 @@ import org.firstinspires.ftc.teamcode.drive.Systems.Vision.SamplePipeline;
 import org.firstinspires.ftc.teamcode.enums.ClawStates;
 import org.firstinspires.ftc.teamcode.enums.DeliveryStates;
 import org.firstinspires.ftc.teamcode.enums.IntakeStates;
+import org.firstinspires.ftc.teamcode.systems.ArmIntakeSystem;
 import org.firstinspires.ftc.teamcode.systems.DeliveryClaw;
 import org.firstinspires.ftc.teamcode.systems.DeliverySystem;
 import org.firstinspires.ftc.teamcode.systems.GamepadBoladao;
+import org.firstinspires.ftc.teamcode.systems.HorizontalLinear;
 import org.firstinspires.ftc.teamcode.systems.IntakeClaw;
 import org.firstinspires.ftc.teamcode.systems.IntakeSystem;
+import org.firstinspires.ftc.teamcode.systems.VerticalLinear;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.openftc.easyopencv.OpenCvWebcam;
 
@@ -24,10 +27,6 @@ import java.util.List;
 @TeleOp(name = "BACK IN BLACK")
 public class TeleOpLoop extends LinearOpMode {
 
-    double x = 0;
-
-    double clawServoPosition = 0;
-
     GamepadBoladao gamepadBoladao;
 
     IntakeSystem intakeSystem;
@@ -35,7 +34,6 @@ public class TeleOpLoop extends LinearOpMode {
 
     Robot robot;
 
-    SamplePipeline pip;
     OpenCvWebcam webcam;
 
     @Override
@@ -59,12 +57,13 @@ public class TeleOpLoop extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
+            double horizontalMultiplier = gamepad1.right_trigger - gamepad1.left_trigger;
             // Read the current list
             List<ColorBlobLocatorProcessor.Blob> blobs = robot.colorLocator.getBlobs();
             ColorBlobLocatorProcessor.Util.filterByArea(1500, 500000, blobs);  // filter out very small blobs.
             gamepadBoladao.readGamepad(gamepad1);
-            intakeSystem.update(robot, telemetry, gamepad2.right_stick_y, clawServoPosition, blobs);
-            deliverySystem.update(robot, telemetry, gamepad2.left_stick_y);
+            intakeSystem.update(robot, horizontalMultiplier, blobs);
+            deliverySystem.update(robot);
 
 
             if (gamepadBoladao.ONEwasYPressed()) {
@@ -111,14 +110,21 @@ public class TeleOpLoop extends LinearOpMode {
                 }
             }
 
-            telemetry.addData("Claw B Rotation ", clawServoPosition);
-            telemetry.addData("Claw B Position: ", robot.clawB.getPosition());
-            telemetry.addData("PRESSED GAMEPAD ONE", gamepadBoladao.ONEwasBPressed());
-            telemetry.addData("PRESSED GAMEPAD TWO", gamepadBoladao.TWOwasBPressed());
-            telemetry.addData("Horizontal Linear Current Position", robot.horizontalLinear.getCurrentPosition());
-            telemetry.addData("X", x);
-            telemetry.update();
 
+            telemetry.addLine("============== INTAKE SYSTEM ==============");
+            telemetry.addLine();
+            telemetry.addData("INTAKE STATE", IntakeSystem.CS.name());
+            telemetry.addData("INTAKE CLAW STATE", IntakeClaw.CS.name());
+            telemetry.addData("ARM INTAKE STATE", ArmIntakeSystem.CS.name());
+            telemetry.addData("HORIZONTAL LINEAR STATE", HorizontalLinear.CS.name());
+            telemetry.addLine();
+            telemetry.addLine();
+            telemetry.addLine("============== DELIVERY SYSTEM ==============");
+            telemetry.addLine();
+            telemetry.addData("DELIVERY STATE", DeliverySystem.CS.name());
+            telemetry.addData("DELIVERY CLAW STATE", DeliveryClaw.CS.name());
+            telemetry.addData("VERTICAL LINEAR STATE", VerticalLinear.CS.name());
+            telemetry.update();
         }
     }
 }
