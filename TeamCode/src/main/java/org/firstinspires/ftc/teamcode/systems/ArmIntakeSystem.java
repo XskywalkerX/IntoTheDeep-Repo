@@ -19,8 +19,6 @@ public class ArmIntakeSystem {
 
     ElapsedTime time = new ElapsedTime();
 
-    double clawBAngle = 0;
-
     HorizontalLinear horizontalLinear;
 
     public ArmIntakeSystem() {
@@ -29,16 +27,7 @@ public class ArmIntakeSystem {
 
         horizontalLinear = new HorizontalLinear();
     }
-
-    public void updateClawAngle(double angle) {
-        clawBAngle = (angle) / 180;
-    }
-
-    public void updateClawPosition(double angle) {
-        clawBAngle = angle;
-    }
-
-    public void update(Robot robot, Telemetry telemetry) {
+    public void update(Robot robot) {
         switch (CS) {
             case INITIALIZE:
             case TRANSFER:
@@ -72,7 +61,6 @@ public class ArmIntakeSystem {
                 }
                 break;
             case READ:
-                HorizontalLinear.CS = HorizontalLinearStates.IDLE;
                 robot.intakeY.setPosition(Globals.INTAKE_Y_READ);
                 if (PS != CS) {
                     robot.intakeX.setPosition(Globals.INTAKE_X_READ);
@@ -87,16 +75,14 @@ public class ArmIntakeSystem {
                 if (time.seconds() >= 0.65) {
                     IntakeClaw.CS = ClawStates.CLOSED;
                     if (time.seconds() >= .85) {
-                        telemetry.addLine("TROCA O ESTAAADO");
                         CS = ArmIntakeStates.TRANSFER;
                         IntakeSystem.CS = IntakeStates.IDLE;
                     }
                 }
                 break;
         }
-        telemetry.addData("ArmIntakeSystem timer ", time.seconds());
 
-        horizontalLinear.update(robot, 0);
+        horizontalLinear.update(robot);
 
         PS = CS;
     }
