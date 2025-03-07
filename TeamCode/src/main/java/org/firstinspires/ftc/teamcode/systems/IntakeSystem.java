@@ -43,6 +43,7 @@ public class IntakeSystem {
     public static double Kd_linear = 0.00001;
 
     public static double theta = 0;
+    public static double theta2 = 0;
 
     List<Integer> alignmentHistory = new ArrayList<>();
 
@@ -163,7 +164,7 @@ public class IntakeSystem {
 
                         if(HorizontalLinear.CS == HorizontalLinearStates.RETRACTED) {
                             HorizontalLinear.CS = HorizontalLinearStates.EXTENDING;
-                        } else {
+                        } else if(HorizontalLinear.CS == HorizontalLinearStates.EXTENDED){
                             HorizontalLinear.CS = HorizontalLinearStates.RETRACTING;
                         }
                     }
@@ -177,7 +178,9 @@ public class IntakeSystem {
                         double aa = mu.mu20 / mu.m00;
                         double bb = mu.mu11 / mu.m00;
                         double cc = mu.mu02 / mu.m00;
-                        theta = Math.abs(Math.atan2(2 * bb, aa - cc) * 180 / Math.PI);
+                        theta2 = Math.atan2(2 * bb, aa - cc) * 180 / Math.PI;
+                        theta = Math.abs(theta2);
+
 
                         double servoOutputPosition = robot.intakeX.getPosition()
                                 + intakeXPID.calculate(blobs.get(0).getBoxFit().center.x, Globals.CAMERA_X_CATCH_SETPOINT);
@@ -214,11 +217,13 @@ public class IntakeSystem {
                             telemetry.update();
                             telemetry.addLine("Sample Aligned!");
 
-                            if (theta < 76) {
-                                robot.clawB.setPosition(0.5);
-                            } else {
-                                robot.clawB.setPosition(0);
-                            }
+//                            if (theta < 76) {
+//                                robot.clawB.setPosition(0.5);
+//                            } else {
+//                                robot.clawB.setPosition(0);
+//                            }
+
+                            robot.clawB.setPosition((theta2 + 90) / 180);
 
                             CS = IntakeStates.CATCH;
                             ArmIntakeSystem.CS = ArmIntakeStates.CATCH;
@@ -230,7 +235,7 @@ public class IntakeSystem {
 
                         if(HorizontalLinear.CS == HorizontalLinearStates.RETRACTED) {
                             HorizontalLinear.CS = HorizontalLinearStates.EXTENDING;
-                        } else {
+                        } else if(HorizontalLinear.CS == HorizontalLinearStates.EXTENDED) {
                             HorizontalLinear.CS = HorizontalLinearStates.RETRACTING;
                         }
                     }
