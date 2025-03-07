@@ -24,8 +24,6 @@ public class DeliverySystem {
     ElapsedTime time = new ElapsedTime();
 
     public static double kp = 0.02;
-    PIDController linearPID = new PIDController(kp, 0, 0);
-
     public DeliverySystem() {
         CS = DeliveryStates.INITIALIZE;
         PS = DeliveryStates.INITIALIZE;
@@ -34,7 +32,7 @@ public class DeliverySystem {
         verticalLinear = new VerticalLinear();
     }
 
-    public void update(Robot robot, Telemetry telemetry, double manualPower) {
+    public void update(Robot robot) {
         switch (CS) {
             case INITIALIZE:
                 VerticalLinear.CS = VerticalLinearStates.PREVENT_STATE;
@@ -115,32 +113,11 @@ public class DeliverySystem {
                 }
         }
 
-        //robot.leftLinear.setPower(manualPower * 0.9);
-        //robot.rightLinear.setPower(manualPower * 0.9);
-
         verticalLinear.update(robot);
         deliveryClaw.update(robot);
 
 
         PS = CS;
-
-        telemetry.addData("Delivery Claw Position ", robot.deliveryClaw.getPosition());
-        telemetry.addData("Delivery Claw State ", DeliveryClaw.CS.name());
-        telemetry.addData("Delivery System timer ", time.seconds());
-        telemetry.addData("Delivery System State ", CS.name());
-        telemetry.addData("Delivery X Position ", robot.deliveryX.getPosition());
-        telemetry.addData("Delivery Y Position ", robot.deliveryY.getPosition());
-        telemetry.addData("Delivery Claw State ", DeliveryClaw.CS.name());
-
-        telemetry.addData("Vertical State", VerticalLinear.CS.name());
-        telemetry.addData("Left Vertical Linear Target Position", robot.leftLinear.getTargetPosition());
-        telemetry.addData("Left Vertical Linear power", robot.leftLinear.getPower());
-        telemetry.addData("Left Vertical Linear Current Position", robot.leftLinear.getCurrentPosition());
-
-        telemetry.addData("Right Vertical Linear Target Position", robot.rightLinear.getTargetPosition());
-        telemetry.addData("Right Vertical Linear power", robot.rightLinear.getPower());
-        telemetry.addData("Right Vertical Linear Current Position", robot.rightLinear.getCurrentPosition());
-
     }
 
 }
