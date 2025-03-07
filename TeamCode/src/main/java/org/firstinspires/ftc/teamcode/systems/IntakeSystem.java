@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.systems;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.enums.ArmIntakeStates;
 import org.firstinspires.ftc.teamcode.enums.ClawStates;
@@ -20,6 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IntakeSystem {
+
+    public static double MULTIPLIER = 1;
+
+    public static double k = 0.2;
     public static IntakeStates CS, PS = IntakeStates.INITIALIZE;
 
     HorizontalLinear horizontalLinear;
@@ -28,8 +31,6 @@ public class IntakeSystem {
     VerticalLinear verticalLinear;
 
     ElapsedTime time = new ElapsedTime();
-    ElapsedTime transferTimer = new ElapsedTime();
-
     PIDController intakeXPID;
     PIDController linearPID;
 
@@ -45,8 +46,6 @@ public class IntakeSystem {
     public static double theta = 0;
     public static double theta2 = 0;
 
-    List<Integer> alignmentHistory = new ArrayList<>();
-
     public IntakeSystem() {
         CS = IntakeStates.INITIALIZE;
         PS = IntakeStates.INITIALIZE;
@@ -60,11 +59,7 @@ public class IntakeSystem {
         linearPID = new PIDController(Kp_linear, Ki_linear, Kd_linear);
     }
 
-    public void updateClawAngle(double angle) {
-        armIntakeSystem.updateClawPosition(angle);
-    }
-
-    public void update(Robot robot, Telemetry telemetry, double manualPower, double clawServoPosition, List<ColorBlobLocatorProcessor.Blob> blobs) {
+    public void update(Robot robot, double manualPower, List<ColorBlobLocatorProcessor.Blob> blobs) {
         switch (CS) {
             case INITIALIZE:
             case IDLE:
@@ -92,6 +87,9 @@ public class IntakeSystem {
                 }
                 break;
             case READING:
+
+                MULTIPLIER *= 1 + (manualPower * k);
+
                 if (PS != CS) {
                     time.reset();
                     IntakeClaw.CS = ClawStates.OPENED;
@@ -104,20 +102,17 @@ public class IntakeSystem {
 
                     if (!blobs.isEmpty() && time.seconds() >= 0.5) {
                         Moments mu = Imgproc.moments(blobs.get(0).getContour());
-                        telemetry.addData("Contour angle ", blobs.get(0).getBoxFit().angle);
 
                         // Compute orientation
                         double aa = mu.mu20 / mu.m00;
                         double bb = mu.mu11 / mu.m00;
                         double cc = mu.mu02 / mu.m00;
-                        theta = Math.abs(Math.atan2(2 * bb, aa - cc) * 180 / Math.PI);
+                        theta2 = 0.5 * Math.atan2(2 * bb, aa - cc) * 180 / Math.PI;
+                        theta = Math.abs(theta2);
 
 
                         double servoOutputPosition = robot.intakeX.getPosition()
                                 + intakeXPID.calculate(blobs.get(0).getBoxFit().center.x, Globals.CAMERA_X_CATCH_SETPOINT);
-
-                        telemetry.addData("Intake X Output Position:", servoOutputPosition);
-                        telemetry.addData("Intake X get Position:", robot.intakeX.getPosition());
 
                         if (servoOutputPosition < 0) {
                             servoOutputPosition = 0;
@@ -142,17 +137,11 @@ public class IntakeSystem {
                             power = -linear_max_vel;
                         }
 
-                        robot.horizontalLinear.setPower(power);
+                        robot.horizontalLinear.setPower(power * MULTIPLIER);
 
                         if ((Math.abs(Globals.CAMERA_X_CATCH_SETPOINT - blobs.get(0).getBoxFit().center.x) < 15) && (Math.abs(Globals.CAMERA_Y_CATCH_SETPOINT - blobs.get(0).getBoxFit().center.y) < 55)) {
-                            telemetry.update();
-                            telemetry.addLine("Sample Aligned!");
 
-                            if (theta < 76) {
-                                robot.clawB.setPosition(0.5);
-                            } else {
-                                robot.clawB.setPosition(0);
-                            }
+                            robot.clawB.setPosition((theta2 + 90) / 180);
 
                             CS = IntakeStates.CATCH;
                             ArmIntakeSystem.CS = ArmIntakeStates.CATCH;
@@ -172,7 +161,6 @@ public class IntakeSystem {
                 } else {
                     if (!blobs.isEmpty()) {
                         Moments mu = Imgproc.moments(blobs.get(0).getContour());
-                        telemetry.addData("Contour angle ", blobs.get(0).getBoxFit().angle);
 
                         // Compute orientation
                         double aa = mu.mu20 / mu.m00;
@@ -184,9 +172,6 @@ public class IntakeSystem {
 
                         double servoOutputPosition = robot.intakeX.getPosition()
                                 + intakeXPID.calculate(blobs.get(0).getBoxFit().center.x, Globals.CAMERA_X_CATCH_SETPOINT);
-
-                        telemetry.addData("Intake X Output Position:", servoOutputPosition);
-                        telemetry.addData("Intake X get Position:", robot.intakeX.getPosition());
 
                         if (servoOutputPosition < 0) {
                             servoOutputPosition = 0;
@@ -211,17 +196,9 @@ public class IntakeSystem {
                             power = -linear_max_vel;
                         }
 
-                        robot.horizontalLinear.setPower(power);
+                        robot.horizontalLinear.setPower(power * MULTIPLIER);
 
                         if ((Math.abs(Globals.CAMERA_X_CATCH_SETPOINT - blobs.get(0).getBoxFit().center.x) < 15) && (Math.abs(Globals.CAMERA_Y_CATCH_SETPOINT - blobs.get(0).getBoxFit().center.y) < 55)) {
-                            telemetry.update();
-                            telemetry.addLine("Sample Aligned!");
-
-//                            if (theta < 76) {
-//                                robot.clawB.setPosition(0.5);
-//                            } else {
-//                                robot.clawB.setPosition(0);
-//                            }
 
                             robot.clawB.setPosition((theta2 + 90) / 180);
 
@@ -266,13 +243,8 @@ public class IntakeSystem {
         linearPID.setD(Kd_linear);
 
         //horizontalLinear.update(robot, manualPower);
-        armIntakeSystem.update(robot, telemetry);
+        armIntakeSystem.update(robot);
         intakeClaw.update(robot);
         verticalLinear.update(robot);
-
-        telemetry.addData("INTAKE STATE", CS.name());
-        telemetry.addData("HORIZONTAL STATE", HorizontalLinear.CS.name());
-        telemetry.addData("ARM INTAKE STATE", ArmIntakeSystem.CS.name());
-        telemetry.addData("INTAKE CLAW STATE", IntakeClaw.CS.name());
     }
 }
